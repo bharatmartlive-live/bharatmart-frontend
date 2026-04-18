@@ -27,10 +27,31 @@ const parseImages = (product) => ({
   video_url: withMediaUrl(product.video_url || '')
 });
 
+const wait = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
+async function requestWithRetry(request, retries = 4) {
+  let lastError;
+
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      return await request();
+    } catch (error) {
+      lastError = error;
+      if (attempt < retries) {
+        await wait(900 * 1.7 ** attempt);
+      }
+    }
+  }
+
+  throw lastError;
+}
+
 export function ShopProvider({ children }) {
   const [products, setProducts] = useState([]);
   const [announcements, setAnnouncements] = useState(fallbackAnnouncements);
   const [coupons, setCoupons] = useState(fallbackCoupons);
+  const [storeError, setStoreError] = useState('');
+  const [reloadAttempt, setReloadAttempt] = useState(0);
   const [cartFeedback, setCartFeedback] = useState(null);
   const [cart, setCart] = useState(() => {
     const saved = localStorage.getItem(CART_KEY);
@@ -46,24 +67,36 @@ export function ShopProvider({ children }) {
     let mounted = true;
 
     async function loadStorefront() {
+      setLoading(true);
+
       try {
-        const [productsRes, contentRes] = await Promise.all([
-          api.get('/products'),
-          api.get('/admin/storefront')
-        ]);
+        const productsRes = await requestWithRetry(() => api.get('/products'), 5);
 
         if (!mounted) return;
 
-        setProducts(productsRes.data.data.map(parseImages));
+        setProducts((productsRes.data.data || []).map(parseImages));
+        setStoreError('');
+      } catch (error) {
+        if (!mounted) return;
+        setStoreError('Live inventory is connecting. Please refresh in a moment.');
+        setProducts(import.meta.env.PROD ? [] : fallbackProducts.map(parseImages));
+      }
+
+      try {
+        const contentRes = await requestWithRetry(() => api.get('/admin/storefront'), 2);
+
+        if (!mounted) return;
+
         setAnnouncements(
-          contentRes.data.data.announcements.length
+          contentRes.data.data.announcements?.length
             ? contentRes.data.data.announcements.map((item) => item.text)
             : fallbackAnnouncements
         );
-        setCoupons(contentRes.data.data.coupons.length ? contentRes.data.data.coupons : fallbackCoupons);
+        setCoupons(contentRes.data.data.coupons?.length ? contentRes.data.data.coupons : fallbackCoupons);
       } catch (error) {
         if (!mounted) return;
-        setProducts(fallbackProducts.map(parseImages));
+        setAnnouncements(fallbackAnnouncements);
+        setCoupons(fallbackCoupons);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -72,6 +105,29 @@ export function ShopProvider({ children }) {
     loadStorefront();
     return () => {
       mounted = false;
+    };
+  }, [reloadAttempt]);
+
+  useEffect(() => {
+    if (products.length || loading || !storeError) return undefined;
+    const timer = window.setTimeout(() => setReloadAttempt((attempt) => attempt + 1), 12000);
+    return () => window.clearTimeout(timer);
+  }, [loading, products.length, storeError]);
+
+  useEffect(() => {
+    const retryWhenCustomerReturns = () => {
+      if (document.visibilityState === 'visible') {
+        setReloadAttempt((attempt) => attempt + 1);
+      }
+    };
+    const retryWhenOnline = () => setReloadAttempt((attempt) => attempt + 1);
+
+    window.addEventListener('online', retryWhenOnline);
+    document.addEventListener('visibilitychange', retryWhenCustomerReturns);
+
+    return () => {
+      window.removeEventListener('online', retryWhenOnline);
+      document.removeEventListener('visibilitychange', retryWhenCustomerReturns);
     };
   }, []);
 
@@ -140,6 +196,7 @@ export function ShopProvider({ children }) {
     cartCount,
     cartSubtotal,
     cartFeedback,
+    storeError,
     loading,
     addToCart,
     updateQuantity,
