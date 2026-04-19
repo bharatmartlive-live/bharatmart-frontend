@@ -26,3 +26,7 @@ export function getTrackingColor(status) {
   if (status === 'Shipped') return 'bg-blue-100 text-blue-700';
   return 'bg-orange-100 text-orange-700';
 }
+
+export function getDisplayOrderNumber(orderId) {
+  return `#${2488 + Number(orderId || 0)}`;
+}

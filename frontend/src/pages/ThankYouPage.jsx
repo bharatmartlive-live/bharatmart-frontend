@@ -1,4 +1,5 @@
 import { Link, useSearchParams } from 'react-router-dom';
+import { getDisplayOrderNumber } from '../lib/customer';
 
 export function ThankYouPage() {
   const [params] = useSearchParams();
@@ -14,7 +15,7 @@ export function ThankYouPage() {
         <p className="mt-4 text-lg text-slate-600">
           Your order has been placed successfully. You can track it from your profile dashboard.
         </p>
-        {orderId ? <p className="mt-4 text-sm font-bold text-orange-600">Order ID: #{orderId}</p> : null}
+        {orderId ? <p className="mt-4 text-sm font-bold text-orange-600">Order ID: {getDisplayOrderNumber(orderId)}</p> : null}
         <div className="mt-8 flex flex-wrap justify-center gap-4">
           <Link to="/login" className="rounded-full bg-ink px-6 py-3 font-bold text-white">
             View Dashboard

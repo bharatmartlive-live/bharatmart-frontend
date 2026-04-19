@@ -4,6 +4,16 @@ import { useParams } from 'react-router-dom';
 import { useLiveViewers } from '../hooks/useLiveViewers';
 import { useShop } from '../hooks/useShop';
 
+function getYouTubeEmbedUrl(url = '') {
+  const shortsMatch = url.match(/youtube\.com\/shorts\/([^?&/]+)/);
+  const watchMatch = url.match(/[?&]v=([^?&]+)/);
+  const shortMatch = url.match(/youtu\.be\/([^?&/]+)/);
+  const embedMatch = url.match(/youtube\.com\/embed\/([^?&/]+)/);
+  const videoId = shortsMatch?.[1] || watchMatch?.[1] || shortMatch?.[1] || embedMatch?.[1];
+
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+}
+
 export function ProductDetailsPage() {
   const { slug } = useParams();
   const { products, addToCart } = useShop();
@@ -20,6 +30,7 @@ export function ProductDetailsPage() {
   const media = product.imageUrls || [];
   const lowStock = Number(product.stock) <= 5;
   const specifications = product.specifications || [];
+  const youtubeEmbedUrl = getYouTubeEmbedUrl(product.video_url);
 
   return (
     <section className="mx-auto max-w-7xl px-3 py-6 animate-page sm:px-4 sm:py-8">
@@ -30,7 +41,16 @@ export function ProductDetailsPage() {
             <span className="absolute left-4 top-4 z-10 rounded bg-red-500 px-3 py-1 text-xs font-black text-white">
               {product.discount}% OFF
             </span>
-            {activeMedia === 'video' && product.video_url ? (
+            {activeMedia === 'video' && youtubeEmbedUrl ? (
+              <iframe
+                key={youtubeEmbedUrl}
+                src={`${youtubeEmbedUrl}?autoplay=1&rel=0`}
+                title={`${product.title} video`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="h-[320px] w-full bg-black sm:h-[440px]"
+              />
+            ) : activeMedia === 'video' && product.video_url ? (
               <video key={product.video_url} controls playsInline preload="metadata" className="h-[320px] w-full bg-black object-contain sm:h-[440px]">
                 <source src={product.video_url} type="video/mp4" />
                 Your browser does not support video playback.

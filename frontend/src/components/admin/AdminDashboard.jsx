@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+ï»¿import { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
+import { getDisplayOrderNumber } from '../../lib/customer';
 import { parseSpecificationText, stringifySpecifications } from '../../lib/specifications';
 
 const initialProduct = {
@@ -34,6 +35,14 @@ const toProductPayload = (form) => ({
     .filter((item) => item.label && item.value)
 });
 
+const formatCurrency = (value) => `Rs ${Math.round(Number(value || 0)).toLocaleString('en-IN')}`;
+
+const getOrderLine = (address = '', label) => {
+  const line = String(address)
+    .split('\n')
+    .find((item) => item.toLowerCase().startsWith(`${label.toLowerCase()}:`));
+  return line ? line.replace(new RegExp(`^${label}:\\s*`, 'i'), '') : '';
+};
 export function AdminDashboard() {
   const [token, setToken] = useState(localStorage.getItem('bharatmart-admin-token') || '');
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
@@ -244,6 +253,102 @@ export function AdminDashboard() {
         {message ? <p className="mt-4 text-sm font-medium text-accent">{message}</p> : null}
       </div>
 
+      <div className="grid gap-4 md:grid-cols-4">
+        <div className="rounded-[24px] bg-white p-5 shadow-soft">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Total Orders</p>
+          <p className="mt-2 text-3xl font-black text-ink">{dashboard.orders.length}</p>
+        </div>
+        <div className="rounded-[24px] bg-white p-5 shadow-soft">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Pending</p>
+          <p className="mt-2 text-3xl font-black text-orange-600">{dashboard.orders.filter((order) => order.status === 'Pending').length}</p>
+        </div>
+        <div className="rounded-[24px] bg-white p-5 shadow-soft">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Delivered</p>
+          <p className="mt-2 text-3xl font-black text-emerald-600">{dashboard.orders.filter((order) => order.status === 'Delivered').length}</p>
+        </div>
+        <div className="rounded-[24px] bg-white p-5 shadow-soft">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Revenue</p>
+          <p className="mt-2 text-2xl font-black text-ink">{formatCurrency(dashboard.orders.reduce((sum, order) => sum + Number(order.total_price || 0), 0))}</p>
+        </div>
+      </div>
+
+      <section className="rounded-[28px] bg-white p-6 shadow-soft">
+        <div className="flex flex-col justify-between gap-3 md:flex-row md:items-end">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.2em] text-orange-600">Order Management</p>
+            <h2 className="mt-2 text-2xl font-black text-ink">All Customer Orders</h2>
+            <p className="mt-1 text-sm text-slate-500">Public order numbers start from #2488 for stronger social proof while database IDs stay private.</p>
+          </div>
+          <button type="button" onClick={loadDashboard} className="rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700">
+            Refresh Orders
+          </button>
+        </div>
+        <div className="mt-5 space-y-4">
+          {dashboard.orders.length ? dashboard.orders.map((order) => {
+            const billing = getOrderLine(order.address, 'Billing');
+            const shipping = getOrderLine(order.address, 'Shipping');
+            const payment = getOrderLine(order.address, 'Payment') || 'COD';
+            const coupon = getOrderLine(order.address, 'Coupon') || 'No coupon';
+            const note = getOrderLine(order.address, 'Note') || 'No note';
+            return (
+              <div key={order.id} className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
+                <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">{new Date(order.created_at).toLocaleString('en-IN')}</p>
+                    <h3 className="mt-1 text-2xl font-black text-ink">Order {getDisplayOrderNumber(order.id)}</h3>
+                    <p className="mt-1 text-sm font-semibold text-slate-600">{order.customer_name} - {order.phone}</p>
+                    <p className="text-sm text-slate-500">{order.email}</p>
+                  </div>
+                  <div className="rounded-2xl bg-white px-4 py-3 text-right shadow-sm">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Order Value</p>
+                    <p className="text-2xl font-black text-emerald-600">{formatCurrency(order.total_price)}</p>
+                    <p className="mt-1 text-xs font-bold text-slate-500">{payment}</p>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  <div className="rounded-2xl bg-white p-4 text-sm">
+                    <p className="font-black text-ink">Billing Address</p>
+                    <p className="mt-1 text-slate-600">{billing || order.address}</p>
+                  </div>
+                  <div className="rounded-2xl bg-white p-4 text-sm">
+                    <p className="font-black text-ink">Shipping Address</p>
+                    <p className="mt-1 text-slate-600">{shipping || billing || order.address}</p>
+                  </div>
+                  <div className="rounded-2xl bg-white p-4 text-sm">
+                    <p className="font-black text-ink">Coupon</p>
+                    <p className="mt-1 text-slate-600">{coupon}</p>
+                  </div>
+                  <div className="rounded-2xl bg-white p-4 text-sm">
+                    <p className="font-black text-ink">Customer Note</p>
+                    <p className="mt-1 text-slate-600">{note}</p>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {['Pending', 'Shipped', 'Delivered'].map((status) => (
+                    <button
+                      key={status}
+                      type="button"
+                      onClick={() => updateOrderStatus(order.id, status)}
+                      className={`rounded-full px-4 py-2 text-xs font-black ${
+                        order.status === status
+                          ? 'bg-brand text-navy'
+                          : 'border border-slate-200 bg-white text-slate-600'
+                      }`}
+                    >
+                      Mark {status}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          }) : (
+            <p className="rounded-3xl bg-slate-50 p-5 text-slate-500">No orders yet.</p>
+          )}
+        </div>
+      </section>
+
       <div className="grid gap-8 xl:grid-cols-2">
         <form onSubmit={handleProductSubmit} className="rounded-[28px] bg-white p-6 shadow-soft">
           <div className="flex items-center justify-between gap-4">
@@ -442,67 +547,29 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      <div className="grid gap-8 xl:grid-cols-2">
-        <section className="rounded-[28px] bg-white p-6 shadow-soft">
-          <h2 className="text-xl font-black text-ink">Products</h2>
-          <div className="mt-4 space-y-3">
-            {dashboard.products.map((product) => (
-              <div key={product.id} className="rounded-2xl bg-slate-50 px-4 py-3">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="font-semibold text-ink">{product.title}</p>
-                    <p className="text-sm text-slate-500">Rs {product.price} • {product.stock} in stock</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button type="button" onClick={() => editProduct(product)} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold">
-                      Edit
-                    </button>
-                    <button type="button" onClick={() => deleteProduct(product.id)} className="rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-white">
-                      Delete
-                    </button>
-                  </div>
+      <section className="rounded-[28px] bg-white p-6 shadow-soft">
+        <h2 className="text-xl font-black text-ink">Products</h2>
+        <div className="mt-4 grid gap-3 lg:grid-cols-2">
+          {dashboard.products.map((product) => (
+            <div key={product.id} className="rounded-2xl bg-slate-50 px-4 py-3">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="font-semibold text-ink">{product.title}</p>
+                  <p className="text-sm text-slate-500">Rs {product.price} - {product.stock} in stock</p>
+                </div>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => editProduct(product)} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold">
+                    Edit
+                  </button>
+                  <button type="button" onClick={() => deleteProduct(product.id)} className="rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-white">
+                    Delete
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-[28px] bg-white p-6 shadow-soft">
-          <h2 className="text-xl font-black text-ink">Orders</h2>
-          <div className="mt-4 space-y-4">
-            {dashboard.orders.map((order) => (
-              <div key={order.id} className="rounded-2xl bg-slate-50 p-4">
-                <p className="font-semibold text-ink">Order #{order.id}</p>
-                <p className="text-sm text-slate-600">{order.customer_name} • {order.phone}</p>
-                <p className="mt-1 text-sm text-slate-500">{order.address}</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {['Pending', 'Shipped', 'Delivered'].map((status) => (
-                    <button
-                      key={status}
-                      type="button"
-                      onClick={() => updateOrderStatus(order.id, status)}
-                      className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                        order.status === status
-                          ? 'bg-brand text-navy'
-                          : 'border border-slate-200 bg-white text-slate-600'
-                      }`}
-                    >
-                      {status}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
-
-
-
-
-
-
-

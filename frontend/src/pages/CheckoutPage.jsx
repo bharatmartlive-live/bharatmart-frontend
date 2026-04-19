@@ -20,15 +20,20 @@ const initialForm = {
 };
 
 export function CheckoutPage() {
-  const { cartItems, cartSubtotal, clearCart } = useShop();
+  const { cartItems, cartSubtotal, clearCart, coupons } = useShop();
   const navigate = useNavigate();
   const [customer, setCustomer] = useState(() => getStoredCustomer());
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState('');
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponStatus, setCouponStatus] = useState('');
   const [placing, setPlacing] = useState(false);
 
   const mrpTotal = cartItems.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
   const savings = mrpTotal - cartSubtotal;
+  const couponDiscount = appliedCoupon ? Math.round((cartSubtotal * Number(appliedCoupon.discount)) / 100) : 0;
+  const payableTotal = Math.max(0, cartSubtotal - couponDiscount);
   const finalShippingAddress = form.sameAsBilling ? form.billingAddress : form.shippingAddress;
 
   useEffect(() => {
@@ -43,6 +48,30 @@ export function CheckoutPage() {
 
   const updateForm = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const applyCoupon = () => {
+    const normalizedCode = couponCode.trim().toUpperCase();
+    const matchedCoupon = coupons.find(
+      (coupon) => String(coupon.code).toUpperCase() === normalizedCode && coupon.active !== false
+    );
+
+    if (!normalizedCode) {
+      setCouponStatus('Please enter a coupon code.');
+      setAppliedCoupon(null);
+      return;
+    }
+
+    if (!matchedCoupon) {
+      setCouponStatus('Coupon not found or currently inactive.');
+      setAppliedCoupon(null);
+      return;
+    }
+
+    const discountAmount = Math.round((cartSubtotal * Number(matchedCoupon.discount)) / 100);
+    setAppliedCoupon(matchedCoupon);
+    setCouponCode(matchedCoupon.code);
+    setCouponStatus(`${matchedCoupon.code} applied. You saved Rs ${discountAmount}.`);
   };
 
   const ensureCustomerAccount = async () => {
@@ -92,8 +121,8 @@ export function CheckoutPage() {
         email: form.email,
         phone: form.phone,
         paymentMethod: form.paymentMethod,
-        address: `Billing: ${form.billingAddress}\nShipping: ${finalShippingAddress}\nPayment: ${form.paymentMethod}\nNote: ${form.note || 'No note'}\nMonthly offers: ${form.monthlyOffers ? 'Yes' : 'No'}`,
-        totalPrice: cartSubtotal,
+        address: `Billing: ${form.billingAddress}\nShipping: ${finalShippingAddress}\nPayment: ${form.paymentMethod}\nCoupon: ${appliedCoupon ? `${appliedCoupon.code} (${appliedCoupon.discount}% off, saved Rs ${couponDiscount})` : 'No coupon'}\nNote: ${form.note || 'No note'}\nMonthly offers: ${form.monthlyOffers ? 'Yes' : 'No'}`,
+        totalPrice: payableTotal,
         items: cartItems.map((item) => ({
           productId: item.id,
           quantity: item.quantity,
@@ -104,6 +133,8 @@ export function CheckoutPage() {
       const { data } = await api.post('/orders', payload);
       clearCart();
       setForm(initialForm);
+      setAppliedCoupon(null);
+      setCouponCode('');
       window.dispatchEvent(new Event('bharatmart-customer-change'));
       navigate(`/thank-you?orderId=${data.orderId}`);
     } catch (error) {
@@ -138,7 +169,7 @@ export function CheckoutPage() {
         <p className="text-sm font-black uppercase tracking-[0.24em] text-orange-600">Secure Checkout</p>
         <h1 className="mt-2 text-3xl font-black text-ink sm:text-4xl">Billing, Account & COD Order</h1>
         <p className="mt-3 max-w-3xl text-slate-600">
-          Review selected products, confirm your details, and place a Cash on Delivery order.
+          Review selected products, apply live coupons, confirm your details, and place a Cash on Delivery order.
         </p>
       </div>
 
@@ -241,12 +272,33 @@ export function CheckoutPage() {
             <div className="flex justify-between"><span>Discounted Price</span><span className="font-bold text-ink">Rs {Math.round(cartSubtotal)}</span></div>
             <div className="flex justify-between"><span>You Save</span><span className="font-bold text-emerald-600">Rs {Math.round(savings)}</span></div>
             <div className="flex justify-between"><span>Shipping</span><span><span className="text-slate-400 line-through">Rs {SHIPPING_CHARGE}</span> <span className="font-bold text-emerald-600">Free</span></span></div>
-            <div className="flex justify-between border-t border-slate-200 pt-3 text-lg font-black text-ink"><span>Total</span><span>Rs {Math.round(cartSubtotal)}</span></div>
+            <div className="rounded-2xl border border-orange-100 bg-orange-50 p-3">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Apply Coupon</p>
+              <div className="mt-3 flex gap-2">
+                <input
+                  value={couponCode}
+                  onChange={(event) => {
+                    setCouponCode(event.target.value.toUpperCase());
+                    if (appliedCoupon) setAppliedCoupon(null);
+                  }}
+                  placeholder="Enter coupon"
+                  className="min-w-0 flex-1 rounded-xl border border-orange-100 bg-white px-3 py-2 font-bold uppercase text-ink"
+                />
+                <button type="button" onClick={applyCoupon} className="rounded-xl bg-ink px-4 py-2 font-black text-white">
+                  Apply
+                </button>
+              </div>
+              {couponStatus ? <p className="mt-2 text-xs font-bold text-orange-700">{couponStatus}</p> : null}
+            </div>
+            {appliedCoupon ? (
+              <div className="flex justify-between"><span>Coupon Discount ({appliedCoupon.code})</span><span className="font-bold text-emerald-600">- Rs {couponDiscount}</span></div>
+            ) : null}
+            <div className="flex justify-between border-t border-slate-200 pt-3 text-lg font-black text-ink"><span>Total</span><span>Rs {Math.round(payableTotal)}</span></div>
           </div>
 
           <div className="mt-5 rounded-2xl bg-orange-50 p-4 text-xs text-slate-700">
             <p className="font-black text-orange-700">Customer Details</p>
-            <p className="mt-2">{form.customerName || 'Name pending'} • {form.phone || 'Phone pending'}</p>
+            <p className="mt-2">{form.customerName || 'Name pending'} - {form.phone || 'Phone pending'}</p>
             <p className="mt-1">{form.email || 'Email pending'}</p>
             <p className="mt-1 line-clamp-3">Ship to: {finalShippingAddress || 'Address pending'}</p>
           </div>

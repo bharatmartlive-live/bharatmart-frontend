@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import { clearStoredCustomer, getStoredCustomer, getTrackingColor, getTrackingLabel, setStoredCustomer } from '../lib/customer';
+import { clearStoredCustomer, getDisplayOrderNumber, getStoredCustomer, getTrackingColor, getTrackingLabel, setStoredCustomer } from '../lib/customer';
 
 export function LoginPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
@@ -79,7 +79,7 @@ export function LoginPage() {
                     <div key={order.id} className="rounded-3xl bg-slate-50 p-5">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <p className="font-black text-ink">Order #{order.id}</p>
+                          <p className="font-black text-ink">Order {getDisplayOrderNumber(order.id)}</p>
                           <p className="text-sm text-slate-500">Total Rs {Math.round(order.total_price)}</p>
                         </div>
                         <span className={`rounded-full px-3 py-1.5 text-xs font-black ${getTrackingColor(order.status)}`}>
