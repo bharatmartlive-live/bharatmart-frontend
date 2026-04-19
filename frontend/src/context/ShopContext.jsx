@@ -9,6 +9,17 @@ import {
 export const ShopContext = createContext(null);
 
 const CART_KEY = 'bharatmart-cart';
+const PRODUCTS_CACHE_KEY = 'bharatmart-live-products';
+
+const readCachedProducts = () => {
+  try {
+    const saved = localStorage.getItem(PRODUCTS_CACHE_KEY);
+    const parsed = saved ? JSON.parse(saved) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+};
 
 const parseJsonArray = (value) => {
   if (!value) return [];
@@ -47,7 +58,7 @@ async function requestWithRetry(request, retries = 4) {
 }
 
 export function ShopProvider({ children }) {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState(readCachedProducts);
   const [announcements, setAnnouncements] = useState(fallbackAnnouncements);
   const [coupons, setCoupons] = useState(fallbackCoupons);
   const [storeError, setStoreError] = useState('');
@@ -74,12 +85,14 @@ export function ShopProvider({ children }) {
 
         if (!mounted) return;
 
-        setProducts((productsRes.data.data || []).map(parseImages));
+        const liveProducts = (productsRes.data.data || []).map(parseImages);
+        setProducts(liveProducts);
+        localStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify(liveProducts));
         setStoreError('');
       } catch (error) {
         if (!mounted) return;
-        setStoreError('Live inventory is connecting. Please refresh in a moment.');
-        setProducts(import.meta.env.PROD ? [] : fallbackProducts.map(parseImages));
+        setStoreError('Loading latest products, please wait...');
+        setProducts((current) => (current.length ? current : import.meta.env.PROD ? [] : fallbackProducts.map(parseImages)));
       }
 
       try {

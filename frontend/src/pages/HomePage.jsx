@@ -30,6 +30,33 @@ export function HomePage() {
           ))}
         </div>
       </section>
+      {loading && !products.length ? (
+        <section className="mx-auto max-w-7xl px-4 py-8">
+          <div className="rounded-[32px] border border-orange-100 bg-white p-8 shadow-soft">
+            <div className="flex flex-col items-center justify-center text-center">
+              <span className="grid size-14 place-items-center rounded-full bg-orange-100">
+                <span className="size-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
+              </span>
+              <h2 className="mt-5 text-2xl font-black text-ink">Loading products, please wait...</h2>
+              <p className="mt-2 max-w-xl text-sm text-slate-600">
+                We are connecting to live BharatMart inventory. Your deals will appear automatically.
+              </p>
+            </div>
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+              {[1, 2, 3, 4].map((item) => (
+                <div key={item} className="overflow-hidden rounded-[28px] border border-slate-100 bg-slate-50">
+                  <div className="h-56 animate-pulse bg-gradient-to-br from-orange-100 via-slate-100 to-blue-100" />
+                  <div className="space-y-3 p-4">
+                    <div className="h-4 w-3/4 animate-pulse rounded-full bg-slate-200" />
+                    <div className="h-4 w-1/2 animate-pulse rounded-full bg-slate-200" />
+                    <div className="h-10 animate-pulse rounded-2xl bg-orange-100" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
       <ProductSection
         title="Trending Summer Products"
         subtitle="High-intent picks shoppers are grabbing right now for peak heat, travel, and everyday comfort."
