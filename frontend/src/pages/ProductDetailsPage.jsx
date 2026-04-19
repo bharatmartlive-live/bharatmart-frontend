@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useLiveViewers } from '../hooks/useLiveViewers';
 import { useShop } from '../hooks/useShop';
+import { getProductType, getRecentOrderCount } from '../lib/productTypes';
 
 function getYouTubeEmbedUrl(url = '') {
   const shortsMatch = url.match(/youtube\.com\/shorts\/([^?&/]+)/);
@@ -31,6 +32,8 @@ export function ProductDetailsPage() {
   const lowStock = Number(product.stock) <= 5;
   const specifications = product.specifications || [];
   const youtubeEmbedUrl = getYouTubeEmbedUrl(product.video_url);
+  const productType = getProductType(product);
+  const recentOrders = getRecentOrderCount(product);
 
   return (
     <section className="mx-auto max-w-7xl px-3 py-6 animate-page sm:px-4 sm:py-8">
@@ -97,6 +100,14 @@ export function ProductDetailsPage() {
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700">
             <Eye className="h-4 w-4" /> {viewers.toLocaleString('en-IN')} people viewing now
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className={`rounded-full border px-4 py-2 text-xs font-black ${productType.tone}`}>
+              {productType.label}
+            </span>
+            <span className="rounded-full bg-slate-900 px-4 py-2 text-xs font-black text-white">
+              {recentOrders.toLocaleString('en-IN')}+ orders in last 5 days
+            </span>
           </div>
           <h1 className="mt-5 text-2xl font-black leading-tight text-ink sm:text-3xl md:text-4xl">{product.title}</h1>
           <p className="mt-2 text-sm font-bold text-emerald-600">4.7 rating - Verified Seller</p>

@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import { getDisplayOrderNumber } from '../../lib/customer';
+import { productTypeOptions } from '../../lib/productTypes';
 import { parseSpecificationText, stringifySpecifications } from '../../lib/specifications';
 
 const initialProduct = {
@@ -407,17 +408,44 @@ export function AdminDashboard() {
                 value={productForm.stock}
                 onChange={(event) => setProductForm((current) => ({ ...current, stock: event.target.value }))}
               />
-              <select
-                className="rounded-2xl border border-slate-200 px-4 py-3"
-                value={productForm.category}
-                onChange={(event) =>
-                  setProductForm((current) => ({ ...current, category: event.target.value }))
-                }
-              >
-                <option>Trending Summer Products</option>
-                <option>Hot Deals</option>
-                <option>Recommended for You</option>
-              </select>
+              <div>
+                <label className="mb-2 block text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+                  Product selling type
+                </label>
+                <select
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  value={productForm.category}
+                  onChange={(event) =>
+                    setProductForm((current) => ({ ...current, category: event.target.value }))
+                  }
+                >
+                  {productTypeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-2 text-xs font-semibold text-slate-500">
+                  Choose Physical, Plant Based/Microgreen, or Digital so the website places it in the right section.
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-3 rounded-3xl border border-slate-100 bg-slate-50 p-4 md:grid-cols-3">
+              {productTypeOptions.slice(0, 3).map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setProductForm((current) => ({ ...current, category: option.value }))}
+                  className={`rounded-2xl border p-4 text-left transition active:scale-95 ${
+                    productForm.category === option.value
+                      ? 'border-orange-400 bg-white shadow-soft'
+                      : 'border-slate-200 bg-white/70 hover:bg-white'
+                  }`}
+                >
+                  <p className="text-sm font-black text-ink">{option.label}</p>
+                  <p className="mt-1 text-xs text-slate-500">{option.hint}</p>
+                </button>
+              ))}
             </div>
             <textarea
               placeholder="Image URLs separated by commas"

@@ -4,10 +4,16 @@ import { useShop } from '../hooks/useShop';
 
 export function HomePage() {
   const { products, coupons, loading, storeError } = useShop();
-  const trendingProducts = products.filter((product) => product.category === 'Trending Summer Products');
+  const microgreenProducts = products.filter((product) => product.category === 'Microgreens');
+  const digitalProducts = products.filter((product) => product.category === 'Digital Products');
+  const physicalTrendingProducts = products.filter((product) => product.category === 'Trending Summer Products');
+  const trendingProducts = [...physicalTrendingProducts, ...microgreenProducts].filter(
+    (product, index, list) => list.findIndex((entry) => entry.id === product.id) === index
+  );
   const hotDealProducts = products.filter((product) => product.category === 'Hot Deals' || Number(product.discount) >= 20);
   const recommendedProducts = products.filter((product) => product.category === 'Recommended for You');
-  const hasCuratedCategories = trendingProducts.length || hotDealProducts.length || recommendedProducts.length;
+  const hasCuratedCategories =
+    trendingProducts.length || hotDealProducts.length || recommendedProducts.length || digitalProducts.length;
 
   return (
     <>
@@ -58,9 +64,40 @@ export function HomePage() {
         </section>
       ) : null}
       <ProductSection
-        title="Trending Summer Products"
-        subtitle="High-intent picks shoppers are grabbing right now for peak heat, travel, and everyday comfort."
+        title="Trending Physical + Microgreen Products"
+        subtitle="A systematic mix of fast-moving dropshipping products like coolers and fresh plant-based microgreens."
         products={hasCuratedCategories ? trendingProducts : products.slice(0, 8)}
+      />
+      {(trendingProducts.length || digitalProducts.length) ? (
+        <section className="mx-auto max-w-7xl px-4 py-4">
+          <div className="grid gap-4 rounded-[30px] border border-slate-100 bg-white p-5 shadow-soft md:grid-cols-3">
+            <div className="rounded-3xl bg-orange-50 p-5">
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-600">Physical Products</p>
+              <h3 className="mt-2 text-xl font-black text-ink">Coolers, gadgets, home essentials</h3>
+              <p className="mt-2 text-sm text-slate-600">COD-ready products for quick impulse purchases.</p>
+            </div>
+            <div className="rounded-3xl bg-emerald-50 p-5">
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-600">Plant Based</p>
+              <h3 className="mt-2 text-xl font-black text-ink">Microgreens and fresh wellness</h3>
+              <p className="mt-2 text-sm text-slate-600">Clearly separated so customers understand freshness and category.</p>
+            </div>
+            <div className="rounded-3xl bg-blue-50 p-5">
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-blue-600">Digital Products</p>
+              <h3 className="mt-2 text-xl font-black text-ink">Guides, PDFs, courses</h3>
+              <p className="mt-2 text-sm text-slate-600">Instant-access products organized away from physical stock.</p>
+            </div>
+          </div>
+        </section>
+      ) : null}
+      <ProductSection
+        title="Fresh Microgreens"
+        subtitle="Plant-based products for health-focused buyers, separated from normal physical inventory."
+        products={microgreenProducts}
+      />
+      <ProductSection
+        title="Digital Products"
+        subtitle="Sell downloadable guides, courses, plans, and other instant-access digital items from the same store."
+        products={digitalProducts}
       />
       <div id="hot-deals">
         <ProductSection

@@ -1,12 +1,15 @@
 import { ShieldCheck, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useShop } from '../../hooks/useShop';
+import { getProductType, getRecentOrderCount } from '../../lib/productTypes';
 
 const discountedPrice = (product) => product.price - (product.price * product.discount) / 100;
 
 export function ProductCard({ product }) {
   const { addToCart } = useShop();
   const image = product.imageUrls?.[0];
+  const productType = getProductType(product);
+  const recentOrders = getRecentOrderCount(product);
 
   return (
     <article className="group overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
@@ -19,6 +22,14 @@ export function ProductCard({ product }) {
         />
       </Link>
       <div className="space-y-4 p-5">
+        <div className="flex flex-wrap gap-2">
+          <span className={`rounded-full border px-3 py-1 text-xs font-black ${productType.tone}`}>
+            {productType.label}
+          </span>
+          <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-black text-white">
+            {recentOrders.toLocaleString('en-IN')}+ orders in last 5 days
+          </span>
+        </div>
         <div className="flex items-start justify-between gap-3">
           <h3 className="line-clamp-2 text-lg font-bold text-ink">{product.title}</h3>
           <span className="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-bold text-orange-600">
@@ -27,7 +38,7 @@ export function ProductCard({ product }) {
         </div>
         <p className="line-clamp-2 text-sm text-slate-600">{product.description}</p>
         <p className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700">
-          <ShieldCheck className="h-4 w-4" /> COD Available
+          <ShieldCheck className="h-4 w-4" /> {productType.badge}
         </p>
         <div className="flex items-end justify-between">
           <div>
