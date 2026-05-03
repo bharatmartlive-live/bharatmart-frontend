@@ -57,5 +57,5 @@ export function getRecentOrderCount(product) {
     .split('')
     .reduce((sum, char) => sum + char.charCodeAt(0), 0);
 
-  return 1000 + (seed % 850);
+  return 1049 + ((seed * 9) % 1600);
 }

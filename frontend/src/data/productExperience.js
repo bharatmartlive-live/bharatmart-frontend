@@ -1,6 +1,6 @@
 import { getProductType } from '../lib/productTypes';
 
-const reviewers = [
+const reviewerPool = [
   ['Neha S.', 'Pune'],
   ['Aman K.', 'Delhi'],
   ['Priya M.', 'Mumbai'],
@@ -10,133 +10,171 @@ const reviewers = [
   ['Ritika P.', 'Bhopal'],
   ['Dev A.', 'Lucknow'],
   ['Megha J.', 'Bengaluru'],
-  ['Suresh V.', 'Ranchi']
+  ['Suresh V.', 'Ranchi'],
+  ['Rohit M.', 'Indore'],
+  ['Pooja T.', 'Nagpur'],
+  ['Vikas P.', 'Patna'],
+  ['Anjali K.', 'Gurugram'],
+  ['Mohit R.', 'Varanasi'],
+  ['Simran D.', 'Chandigarh'],
+  ['Deepak N.', 'Surat'],
+  ['Komal A.', 'Ahmedabad'],
+  ['Nitin J.', 'Kanpur'],
+  ['Aarti V.', 'Hyderabad']
 ];
 
-const ratings = [5, 5, 4, 5, 4, 5, 5, 4, 5, 4];
-const dates = [
-  '2 days ago',
-  '4 days ago',
-  '5 days ago',
-  '1 week ago',
-  '8 days ago',
-  '10 days ago',
-  '11 days ago',
-  '12 days ago',
-  '13 days ago',
-  '2 weeks ago'
+const ratingsPool = [5, 5, 4, 5, 4, 5, 5, 4, 5, 4, 5, 4, 5, 5, 4, 5, 4, 5, 4, 5];
+const datesPool = [
+  '2 din pehle',
+  '4 din pehle',
+  '5 din pehle',
+  '1 week pehle',
+  '8 din pehle',
+  '10 din pehle',
+  '11 din pehle',
+  '12 din pehle',
+  '13 din pehle',
+  '2 weeks pehle',
+  '15 din pehle',
+  '17 din pehle',
+  '19 din pehle',
+  '21 din pehle',
+  '23 din pehle',
+  '25 din pehle',
+  '26 din pehle',
+  '27 din pehle',
+  '28 din pehle',
+  '29 din pehle'
 ];
-
-const usagePhotosByType = {
-  'Physical Product': [
-    'https://images.unsplash.com/photo-1661715759582-c792f9f5b280?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1595514535415-dae8dd1f2e43?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=900&q=80'
-  ],
-  'Plant Based': [
-    'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=900&q=80'
-  ],
-  'Digital Product': [
-    'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=80'
-  ]
-};
 
 const faqByType = {
   'Physical Product': [
-    ['How long does delivery take?', 'Most physical products are dispatched quickly and usually arrive within 3 to 7 days depending on your location.'],
-    ['Is COD available?', 'Yes, Cash on Delivery is available for eligible pin codes and shown clearly on the product page.'],
-    ['What if stock runs out?', 'If the item sells out, BharatMart usually restocks popular physical products in around 14 days.'],
-    ['Can I return the item?', 'Eligible physical products can be returned within 7 days if unused, undamaged, and packed properly.'],
-    ['Will I receive tracking updates?', 'Yes, after checkout your dashboard shows packed, shipped, and delivered status updates.']
+    ['Delivery kitne din me hoti hai?', 'Usually physical product 3 se 7 din me deliver ho jata hai, location ke hisaab se thoda vary kar sakta hai.'],
+    ['COD available hai kya?', 'Haan, eligible pin codes par Cash on Delivery available hai aur product page par clearly shown hai.'],
+    ['Stock khatam ho gaya to?', 'Agar item sold out ho jaye, popular physical products ka restock around 14 days ke andar expected hota hai.'],
+    ['Return possible hai?', 'Eligible products 7 days ke andar return ho sakte hain if unused, proper condition me aur original packaging ke saath.'],
+    ['Tracking update milega?', 'Haan, dashboard me packed, shipped aur delivered status step by step show hota hai.']
   ],
   'Plant Based': [
-    ['How fresh are microgreen orders?', 'Plant-based microgreen orders are handled carefully and listed separately so freshness expectations stay clear.'],
-    ['How should I store them after delivery?', 'Keep plant-based products refrigerated or as instructed on the pack to preserve freshness and texture.'],
-    ['Is COD available for microgreens?', 'Yes, where serviceable. Availability may depend on your delivery pin code and perishability window.'],
-    ['What if my pack arrives damaged?', 'Contact support quickly with photos and your order number so the team can review and help.'],
-    ['Why are microgreens shown separately?', 'They are separated from physical gadgets and digital products so customers can shop by product nature more easily.']
+    ['Microgreen kitna fresh aata hai?', 'Plant-based items carefully handled hote hain aur alag section me dikhaye jaate hain so freshness expectation clear rahe.'],
+    ['Delivery ke baad kaise store karein?', 'Refrigeration ya pack instructions follow karein to freshness aur texture better rahega.'],
+    ['COD available hai kya?', 'Haan, serviceable area me available ho sakta hai. Perishable item hone ki wajah se pin code par depend kar sakta hai.'],
+    ['Damage aaye to kya karein?', 'Order number aur photo ke saath support ko jaldi contact karein, team help karegi.'],
+    ['Ye alag section me kyun dikh raha hai?', 'Microgreen products ko alag dikhaya gaya hai so buyer ko clear rahe ki ye fresh plant-based category hai.']
   ],
   'Digital Product': [
-    ['How do I receive the digital product?', 'Digital products are meant for instant-access delivery flow and are listed separately from physical inventory.'],
-    ['Will this be shipped physically?', 'No. Digital products are non-physical and are intended for downloadable or online access use cases.'],
-    ['Can I use coupon codes on digital items?', 'Yes, active coupon codes can still apply if the product is eligible during checkout.'],
-    ['Is COD available on digital products?', 'COD labels are used store-wide, but final digital fulfillment rules can be customized later if needed.'],
-    ['Can I access it again later?', 'Customer dashboard and order records help keep your purchase trail organized for future support.']
+    ['Digital product kaise milega?', 'Digital product instant-access type section ke liye organized hai aur physical inventory se alag show hota hai.'],
+    ['Kya ye courier se aayega?', 'Nahi, digital products non-physical hote hain aur downloadable ya online-access use case ke liye hote hain.'],
+    ['Coupon apply kar sakte hain?', 'Haan, active coupon eligible item par apply ho sakta hai during checkout.'],
+    ['COD hai kya?', 'Store-wide COD messaging visible hai, lekin digital fulfillment rules aap baad me aur customize kar sakte hain.'],
+    ['Purchase history baad me dikhegi?', 'Haan, dashboard aur order records se support aur reference maintain karna easy rahega.']
   ]
 };
 
-function getReviewCopy(product, index) {
+function makeSeed(product) {
+  return String(product?.slug || product?.title || product?.id || 'bharatmart')
+    .split('')
+    .reduce((sum, char) => sum + char.charCodeAt(0), 0);
+}
+
+function isCoolerProduct(product) {
+  const text = `${product?.title || ''} ${product?.description || ''}`.toLowerCase();
+  return text.includes('cooler') || text.includes('fan') || text.includes('cooling');
+}
+
+function getReviewTemplates(product) {
   const type = getProductType(product).label;
 
   if (type === 'Plant Based') {
     return [
-      `Fresh quality was better than expected. ${product.title} looked clean, well packed, and worth reordering.`,
-      `I added ${product.title} to my diet plan and the product felt premium, healthy, and carefully handled.`,
-      `Very good freshness and packaging. The item reached on time and tasted exactly as described.`,
-      `Good plant-based option. I liked the quality, and the listing felt clear compared with other marketplaces.`,
-      `The order was neat, fresh, and simple to use right away. I will try more microgreen products from BharatMart.`,
-      `${product.title} matched the description well. Nice for health-focused buyers who want something different.`,
-      `Delivery and freshness were both solid. I appreciate that microgreen products are shown separately on the site.`,
-      `Good value considering the presentation and quality. Customer support also felt trustworthy.`,
-      `This was my first microgreen order online and the experience was smooth from checkout to delivery.`,
-      `Healthy, fresh, and well packed. Easy product page and good confidence-building details.`
-    ][index];
+      `${product.title} fresh aaya, packaging bhi clean thi. Healthy option laga and taste bhi expected jaisa tha.`,
+      `Maine first time online plant-based item order kiya and honestly kaafi accha experience raha.`,
+      `Quality genuine lagi, bilkul random marketplace jaisa nahi. Freshness maintained thi.`,
+      `Diet plan ke liye liya tha, kaam aa raha hai. Product page pe jo likha tha woh mostly same mila.`,
+      `Packing achhi thi aur item fresh feel hua. Family ko bhi pasand aaya.`,
+      `Plant based section alag dikhana smart hai, buyer ko clear rehta hai kya order kar rahe hain.`,
+      `Value for money laga. Support aur delivery dono smooth the.`,
+      `Fresh product, decent pricing, aur trust feel aaya website se.`,
+      `Quality expected se better thi. Next time bhi yahi section se try karunga.`,
+      `Healthy choice ke liye accha option hai, especially jab clear description mil jaye.`,
+      `Delivery on time thi aur product dekhkar confidence aaya ki listing genuine hai.`,
+      `Mujhe freshness aur clean packing dono pasand aaye.`
+    ];
   }
 
   if (type === 'Digital Product') {
     return [
-      `${product.title} felt practical and easy to understand. The listing made it clear what kind of product it was.`,
-      `Useful purchase. I like that digital products are separated from physical items on BharatMart.`,
-      `The product description was clear and the value felt strong for the price point.`,
-      `Simple checkout and a well-organized product page. Good experience overall.`,
-      `I bought ${product.title} because the offer looked genuine and the details were easy to scan.`,
-      `Neat presentation and straightforward product promise. Perfect for quick digital buying decisions.`,
-      `The page answered most of my doubts before purchase. Very smooth storefront experience.`,
-      `Looked premium, organized, and more trustworthy than many basic digital stores.`,
-      `Clean design and easy-to-read info helped me decide fast.`,
-      `Good value and a clear digital-product layout. Would buy again from the same section.`
-    ][index];
+      `${product.title} ka page clear tha, samajh aa gaya ye digital item hai. Confusion nahi hua.`,
+      `Presentation premium lagi. Product details short but useful thi.`,
+      `Digital section alag hai, isse shopping easy ho jati hai.`,
+      `Checkout simple laga and product ka value proposition clear tha.`,
+      `Mujhe ye isliye pasand aaya kyunki page overpromise nahi kar raha tha.`,
+      `Clean layout, easy understanding, aur genuine feel aayi.`,
+      `Product description readable thi aur purchase decision jaldi ho gaya.`,
+      `Digital item ke liye trust important hota hai, yahan woh feel aaya.`,
+      `Store ka design accha hai aur digital listing random nahi lagti.`,
+      `Kaafi organized experience tha, especially compared to basic template stores.`
+    ];
   }
 
   return [
-    `${product.title} is working really well. Build quality feels solid and the delivery was quick.`,
-    `Good purchase for the price. The product matched the description and the offer looked genuine.`,
-    `I bought this after seeing the urgency and reviews, and the item actually delivered on expectations.`,
-    `Useful product, nice packaging, and easy COD checkout. BharatMart gave a trustworthy feel.`,
-    `The quality is better than many marketplace listings I have tried before. Worth ordering.`,
-    `Very happy with the purchase. The item looks premium and the tracking updates were clear.`,
-    `I liked the product finish and how simple the order process was. Would recommend it.`,
-    `The product arrived in good condition and started being useful from day one.`,
-    `Strong value for money. The listing, discount, and seller trust badges helped a lot.`,
-    `This felt like a safer buy because the site clearly showed stock, offers, and COD information.`
-  ][index];
+    `${product.title} sach me useful nikla. Price ke hisaab se kaafi accha product hai.`,
+    `Build quality expected se better lagi. Delivery bhi fast thi aur COD easy tha.`,
+    `Maine offer dekh ke order kiya tha, but product genuinely accha nikla.`,
+    `Cooling aur daily use dono ke liye kaafi practical hai. Paisa vasool laga.`,
+    `Jo description me dikhaya tha woh same mila. Fake ya low quality feel nahi aayi.`,
+    `Packaging theek thi aur product start se hi kaam kar raha hai, no issue till now.`,
+    `Is range me ye best laga. Website pe urgency aur details dono useful the.`,
+    `Mummy ke liye liya tha aur unko bhi pasand aaya. Simple use and helpful product.`,
+    `Product lightweight hai but cheap feel nahi hota. Worth buying if you need it.`,
+    `Expected se accha nikla, especially discount price pe.`,
+    `Summer use ke liye mast hai. Cooling decent hai aur overall quality bhi sahi lagi.`,
+    `Office desk use ke liye liya tha, kaafi kaam ka nikla.`,
+    `Fan/cooler category me ye better option laga compared to random sellers.`,
+    `Stock aur reviews dekh ke liya tha, decision sahi nikla.`,
+    `Color, finish aur performance teenon achhe lage. Return karne ki zarurat nahi padi.`,
+    `Website genuine lagi and product bhi waise hi nikla. Recommend karunga.`,
+    `Kaafi logon ne liya hai, reason samajh aa gaya after using it.`,
+    `Size compact hai but kaam bada karta hai. Daily use me accha chal raha hai.`
+  ];
 }
 
 export function getProductReviews(product) {
-  const type = getProductType(product).label;
-  const usagePhotos = usagePhotosByType[type] || usagePhotosByType['Physical Product'];
+  const seed = makeSeed(product);
+  const templates = getReviewTemplates(product);
+  const reviewCount = isCoolerProduct(product) ? 18 : 10;
 
-  return reviewers.map(([name, city], index) => ({
-    id: `${product.id || product.slug || product.title}-${index}`,
-    name,
-    city,
-    rating: ratings[index],
-    title: `${product.title} review ${index + 1}`,
-    body: getReviewCopy(product, index),
-    date: dates[index],
-    verified: true,
-    image: index < 3 ? usagePhotos[index % usagePhotos.length] : ''
-  }));
+  return Array.from({ length: reviewCount }).map((_, index) => {
+    const reviewer = reviewerPool[(seed + index) % reviewerPool.length];
+    const rating = ratingsPool[(seed + index) % ratingsPool.length];
+    const date = datesPool[(seed + index) % datesPool.length];
+    const template = templates[index % templates.length];
+
+    return {
+      id: `${product.id || product.slug || product.title}-${index}`,
+      name: reviewer[0],
+      city: reviewer[1],
+      rating,
+      body: template,
+      date,
+      verified: true
+    };
+  });
 }
 
 export function getAverageRating(product) {
   const reviews = getProductReviews(product);
   const average = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
   return Number(average.toFixed(1));
+}
+
+export function getVisibleReviewCount(product) {
+  return getProductReviews(product).length;
+}
+
+export function getReviewVolume(product) {
+  const seed = makeSeed(product);
+  return 1049 + ((seed * 7) % 1700);
 }
 
 export function getProductFaqs(product) {
