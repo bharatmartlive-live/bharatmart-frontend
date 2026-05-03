@@ -14,7 +14,7 @@ const navLinks = [
   ['Testimonials', '/testimonials']
 ];
 
-const supportUrl = 'https://wa.me/918826333790?text=I%20need%20support%20related%20to%20some%20product%20on%20bharatmart.live';
+const supportUrl = 'https://wa.me/918826219600?text=I%20need%20support%20related%20to%20some%20product%20on%20bharatmart.live';
 
 export function Header() {
   const { cartCount } = useShop();

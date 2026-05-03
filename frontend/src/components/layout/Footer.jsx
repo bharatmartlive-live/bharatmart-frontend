@@ -1,4 +1,4 @@
-import { Facebook, Instagram, Mail, MapPin, Phone, ShieldCheck, Youtube } from 'lucide-react';
+﻿import { Facebook, Instagram, Mail, MapPin, Phone, ShieldCheck, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/logo.svg';
 import { socialLinks } from '../../data/socialLinks';
@@ -61,7 +61,7 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-black text-white">Contact Us</h3>
             <div className="mt-5 space-y-4 text-sm">
-              <p className="flex items-center gap-3"><Phone className="h-4 w-4" /> +91 98765 43210</p>
+              <p className="flex items-center gap-3"><Phone className="h-4 w-4" /> +91 88262 19600</p>
               <p className="flex items-center gap-3"><Mail className="h-4 w-4" /> support@bharatmart.live</p>
               <p className="flex items-center gap-3"><MapPin className="h-4 w-4" /> Mumbai, India</p>
             </div>
@@ -88,11 +88,12 @@ export function Footer() {
           </div>
         </div>
         <div className="mx-auto max-w-7xl border-t border-white/10 px-4 py-6 text-center text-xs text-slate-500">
-          � 2026 BharatMart.live. All rights reserved. Made with love in India.
+          © 2026 BharatMart.live. All rights reserved. Made with love in India.
         </div>
       </div>
     </footer>
   );
 }
+
 
 

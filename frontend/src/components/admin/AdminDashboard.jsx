@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from 'react';
+import { ExternalLink, Filter, MessageCircle, Search } from 'lucide-react';
 import { api } from '../../lib/api';
 import { getDisplayOrderNumber } from '../../lib/customer';
 import { productTypeOptions } from '../../lib/productTypes';
@@ -44,6 +45,13 @@ const getOrderLine = (address = '', label) => {
     .find((item) => item.toLowerCase().startsWith(`${label.toLowerCase()}:`));
   return line ? line.replace(new RegExp(`^${label}:\\s*`, 'i'), '') : '';
 };
+
+const getOrderSupportUrl = (order) => {
+  const orderNumber = getDisplayOrderNumber(order.id);
+  const text = encodeURIComponent(`Hello BharatMart, I need help with ${orderNumber} for ${order.customer_name}.`);
+  return `https://wa.me/918826219600?text=${text}`;
+};
+
 export function AdminDashboard() {
   const [token, setToken] = useState(localStorage.getItem('bharatmart-admin-token') || '');
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
@@ -60,8 +68,16 @@ export function AdminDashboard() {
   const [message, setMessage] = useState('');
   const [loginStatus, setLoginStatus] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  const [orderSearch, setOrderSearch] = useState('');
+  const [orderFilter, setOrderFilter] = useState('All');
 
   const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+  const filteredOrders = dashboard.orders.filter((order) => {
+    const matchesFilter = orderFilter === 'All' ? true : order.status === orderFilter;
+    const haystack = `${order.customer_name} ${order.phone} ${order.email} ${order.id}`.toLowerCase();
+    const matchesSearch = haystack.includes(orderSearch.trim().toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
 
   const loadDashboard = async () => {
     if (!token) return;
@@ -284,8 +300,36 @@ export function AdminDashboard() {
             Refresh Orders
           </button>
         </div>
+        <div className="mt-5 grid gap-3 rounded-3xl border border-slate-100 bg-slate-50 p-4 lg:grid-cols-[1fr,auto,auto]">
+          <label className="relative">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              value={orderSearch}
+              onChange={(event) => setOrderSearch(event.target.value)}
+              placeholder="Search by customer, phone, email, order id"
+              className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none focus:border-orange-300"
+            />
+          </label>
+          <label className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-600">
+            <Filter className="h-4 w-4" />
+            <select
+              value={orderFilter}
+              onChange={(event) => setOrderFilter(event.target.value)}
+              className="bg-transparent outline-none"
+            >
+              {['All', 'Pending', 'Shipped', 'Delivered'].map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">
+            Showing {filteredOrders.length} orders
+          </div>
+        </div>
         <div className="mt-5 space-y-4">
-          {dashboard.orders.length ? dashboard.orders.map((order) => {
+          {filteredOrders.length ? filteredOrders.map((order) => {
             const billing = getOrderLine(order.address, 'Billing');
             const shipping = getOrderLine(order.address, 'Shipping');
             const payment = getOrderLine(order.address, 'Payment') || 'COD';
@@ -341,11 +385,25 @@ export function AdminDashboard() {
                       Mark {status}
                     </button>
                   ))}
+                  <a
+                    href={getOrderSupportUrl(order)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-xs font-black text-white transition hover:bg-emerald-600"
+                  >
+                    <MessageCircle className="h-4 w-4" /> WhatsApp
+                  </a>
+                  <a
+                    href={`mailto:${order.email}`}
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-700 transition hover:border-orange-300 hover:text-orange-600"
+                  >
+                    <ExternalLink className="h-4 w-4" /> Open Contact
+                  </a>
                 </div>
               </div>
             );
           }) : (
-            <p className="rounded-3xl bg-slate-50 p-5 text-slate-500">No orders yet.</p>
+            <p className="rounded-3xl bg-slate-50 p-5 text-slate-500">No orders match this filter right now.</p>
           )}
         </div>
       </section>
@@ -601,3 +659,4 @@ export function AdminDashboard() {
     </div>
   );
 }
+

@@ -13,6 +13,6 @@ export const socialLinks = [
   },
   {
     name: 'WhatsApp',
-    url: 'https://wa.me/918826333790?text=Hello%20BharatMart,%20I%20want%20some%20info%20regarding%20a%20particular%20product.%20Please%20reply'
+    url: 'https://wa.me/918826219600?text=Hello%20BharatMart,%20I%20want%20some%20info%20regarding%20a%20particular%20product.%20Please%20reply'
   }
 ];

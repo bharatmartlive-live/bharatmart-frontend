@@ -1,6 +1,7 @@
-import { Eye, PlayCircle, ShoppingCart, ShieldCheck, Truck } from 'lucide-react';
+import { Eye, MessageSquareQuote, PlayCircle, ShoppingCart, ShieldCheck, Star, Truck } from 'lucide-react';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { getAverageRating, getProductFaqs, getProductReviews } from '../data/productExperience';
 import { useLiveViewers } from '../hooks/useLiveViewers';
 import { useShop } from '../hooks/useShop';
 import { getProductType, getRecentOrderCount } from '../lib/productTypes';
@@ -34,6 +35,9 @@ export function ProductDetailsPage() {
   const youtubeEmbedUrl = getYouTubeEmbedUrl(product.video_url);
   const productType = getProductType(product);
   const recentOrders = getRecentOrderCount(product);
+  const reviews = getProductReviews(product);
+  const averageRating = getAverageRating(product);
+  const faqs = getProductFaqs(product);
 
   return (
     <section className="mx-auto max-w-7xl px-3 py-6 animate-page sm:px-4 sm:py-8">
@@ -110,7 +114,12 @@ export function ProductDetailsPage() {
             </span>
           </div>
           <h1 className="mt-5 text-2xl font-black leading-tight text-ink sm:text-3xl md:text-4xl">{product.title}</h1>
-          <p className="mt-2 text-sm font-bold text-emerald-600">4.7 rating - Verified Seller</p>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <p className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-2 text-sm font-black text-emerald-700">
+              <Star className="h-4 w-4 fill-current" /> {averageRating} average rating
+            </p>
+            <p className="text-sm font-bold text-slate-500">{reviews.length} verified reviews</p>
+          </div>
 
           <div className="mt-5 rounded bg-orange-50 p-5">
             <div className="flex flex-wrap items-end gap-3">
@@ -188,6 +197,70 @@ export function ProductDetailsPage() {
                 <p className="mt-1 text-slate-500"><Truck className="mr-1 inline h-4 w-4" />{text}</p>
               </div>
             ))}
+          </div>
+
+          <div className="mt-8 rounded-[28px] border border-slate-200 bg-white p-5 shadow-soft">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-600">Customer Reviews</p>
+                <h2 className="mt-2 text-2xl font-black text-ink">Real buyer feedback</h2>
+              </div>
+              <div className="rounded-2xl bg-slate-950 px-4 py-3 text-white">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-300">Average Rating</p>
+                <p className="mt-1 flex items-center gap-2 text-2xl font-black">
+                  <Star className="h-5 w-5 fill-current text-yellow-400" /> {averageRating}
+                </p>
+              </div>
+            </div>
+            <div className="mt-5 grid gap-4 lg:grid-cols-2">
+              {reviews.map((review) => (
+                <article key={review.id} className="rounded-3xl border border-slate-100 bg-slate-50 p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-orange-100 text-sm font-black text-orange-700">
+                      {review.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <p className="font-black text-ink">{review.name}</p>
+                          <p className="text-xs text-slate-500">{review.city} • {review.date}</p>
+                        </div>
+                        <div className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-black text-amber-600 shadow-sm">
+                          {Array.from({ length: review.rating }).map((_, index) => (
+                            <Star key={index} className="h-3.5 w-3.5 fill-current" />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="mt-3 text-sm leading-6 text-slate-700">{review.body}</p>
+                      {review.image ? (
+                        <img
+                          src={review.image}
+                          alt={`${product.title} customer usage`}
+                          loading="lazy"
+                          className="mt-4 h-40 w-full rounded-2xl object-cover"
+                        />
+                      ) : null}
+                      <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
+                        <MessageSquareQuote className="h-3.5 w-3.5" /> Verified purchase
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8 rounded-[28px] border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-600">Product FAQ</p>
+            <h2 className="mt-2 text-2xl font-black text-ink">Questions customers ask before buying</h2>
+            <div className="mt-5 space-y-3">
+              {faqs.map(([question, answer]) => (
+                <article key={question} className="rounded-3xl border border-slate-100 bg-slate-50 p-4">
+                  <h3 className="font-black text-ink">{question}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{answer}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </div>
       </div>

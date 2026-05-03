@@ -1,5 +1,6 @@
-import { ShieldCheck, ShoppingBag } from 'lucide-react';
+import { ShieldCheck, ShoppingBag, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getAverageRating } from '../../data/productExperience';
 import { useShop } from '../../hooks/useShop';
 import { getProductType, getRecentOrderCount } from '../../lib/productTypes';
 
@@ -10,6 +11,7 @@ export function ProductCard({ product }) {
   const image = product.imageUrls?.[0];
   const productType = getProductType(product);
   const recentOrders = getRecentOrderCount(product);
+  const averageRating = getAverageRating(product);
 
   return (
     <article className="group overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
@@ -35,6 +37,12 @@ export function ProductCard({ product }) {
           <span className="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-bold text-orange-600">
             -{product.discount}%
           </span>
+        </div>
+        <div className="flex items-center gap-2 text-sm">
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 font-black text-amber-700">
+            <Star className="h-3.5 w-3.5 fill-current" /> {averageRating}
+          </span>
+          <span className="text-slate-500">10 reviews</span>
         </div>
         <p className="line-clamp-2 text-sm text-slate-600">{product.description}</p>
         <p className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700">
