@@ -1,5 +1,14 @@
 ﻿import { useEffect, useState } from 'react';
-import { ExternalLink, Filter, MessageCircle, Search } from 'lucide-react';
+import {
+  BarChart3,
+  ExternalLink,
+  Filter,
+  MessageCircle,
+  MousePointerClick,
+  Search,
+  ShoppingCart,
+  Users
+} from 'lucide-react';
 import { api } from '../../lib/api';
 import { getDisplayOrderNumber } from '../../lib/customer';
 import { productTypeOptions } from '../../lib/productTypes';
@@ -52,6 +61,29 @@ const getOrderSupportUrl = (order) => {
   return `https://wa.me/918826219600?text=${text}`;
 };
 
+const emptyAnalytics = {
+  overview: {
+    uniqueVisitors: 0,
+    pageViews: 0,
+    productViews: 0,
+    addToCartEvents: 0,
+    uniqueVisitors7d: 0,
+    pageViews7d: 0,
+    productViews7d: 0,
+    addToCartEvents7d: 0,
+    addToCartRate: 0
+  },
+  products: []
+};
+
+const formatAnalyticsDate = (value) => {
+  if (!value) return 'No activity yet';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? 'No activity yet'
+    : date.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+};
+
 export function AdminDashboard() {
   const [token, setToken] = useState(localStorage.getItem('bharatmart-admin-token') || '');
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
@@ -63,7 +95,8 @@ export function AdminDashboard() {
     products: [],
     orders: [],
     announcements: [],
-    coupons: []
+    coupons: [],
+    analytics: emptyAnalytics
   });
   const [message, setMessage] = useState('');
   const [loginStatus, setLoginStatus] = useState('');
@@ -78,6 +111,9 @@ export function AdminDashboard() {
     const matchesSearch = haystack.includes(orderSearch.trim().toLowerCase());
     return matchesFilter && matchesSearch;
   });
+  const analyticsOverview = dashboard.analytics?.overview || emptyAnalytics.overview;
+  const analyticsProducts = dashboard.analytics?.products || [];
+  const analyticsByProductId = new Map(analyticsProducts.map((product) => [String(product.id), product]));
 
   const loadDashboard = async () => {
     if (!token) return;
@@ -270,6 +306,71 @@ export function AdminDashboard() {
         {message ? <p className="mt-4 text-sm font-medium text-accent">{message}</p> : null}
       </div>
 
+      <section className="rounded-[28px] bg-white p-6 shadow-soft">
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.2em] text-orange-600">Website Analytics</p>
+            <h2 className="mt-2 text-2xl font-black text-ink">Visitor, product click, and cart activity</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              These are real browser-session analytics from your live website. Unique visitors are approximate by device/browser session.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={loadDashboard}
+            className="rounded-full border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700"
+          >
+            Refresh Analytics
+          </button>
+        </div>
+
+        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {[
+            {
+              title: 'Unique Visitors',
+              value: analyticsOverview.uniqueVisitors,
+              detail: `${analyticsOverview.uniqueVisitors7d} in last 7 days`,
+              icon: Users,
+              tone: 'bg-blue-50 text-blue-700'
+            },
+            {
+              title: 'Page Views',
+              value: analyticsOverview.pageViews,
+              detail: `${analyticsOverview.pageViews7d} in last 7 days`,
+              icon: BarChart3,
+              tone: 'bg-violet-50 text-violet-700'
+            },
+            {
+              title: 'Product Clicks',
+              value: analyticsOverview.productViews,
+              detail: `${analyticsOverview.productViews7d} in last 7 days`,
+              icon: MousePointerClick,
+              tone: 'bg-orange-50 text-orange-700'
+            },
+            {
+              title: 'Add To Cart',
+              value: analyticsOverview.addToCartEvents,
+              detail: `${analyticsOverview.addToCartEvents7d} in last 7 days | ${analyticsOverview.addToCartRate}% rate`,
+              icon: ShoppingCart,
+              tone: 'bg-emerald-50 text-emerald-700'
+            }
+          ].map((card) => {
+            const Icon = card.icon;
+
+            return (
+              <div key={card.title} className="rounded-[24px] border border-slate-200 bg-slate-50 p-5">
+                <div className={`inline-flex rounded-2xl p-3 ${card.tone}`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <p className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-slate-500">{card.title}</p>
+                <p className="mt-2 text-3xl font-black text-ink">{Number(card.value || 0).toLocaleString('en-IN')}</p>
+                <p className="mt-2 text-sm text-slate-500">{card.detail}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
       <div className="grid gap-4 md:grid-cols-4">
         <div className="rounded-[24px] bg-white p-5 shadow-soft">
           <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Total Orders</p>
@@ -406,6 +507,67 @@ export function AdminDashboard() {
             <p className="rounded-3xl bg-slate-50 p-5 text-slate-500">No orders match this filter right now.</p>
           )}
         </div>
+      </section>
+
+      <section className="rounded-[28px] bg-white p-6 shadow-soft">
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.2em] text-orange-600">Product Performance</p>
+            <h2 className="mt-2 text-2xl font-black text-ink">Which products get clicked and added to cart</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Product clicks mean visitors opened the product detail page. Add-to-cart rate helps you judge buyer interest.
+            </p>
+          </div>
+          <div className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white">
+            Tracking starts after this deploy goes live
+          </div>
+        </div>
+
+        {analyticsProducts.length ? (
+          <div className="mt-5 overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 text-left text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+                  <th className="px-3 py-3">Product</th>
+                  <th className="px-3 py-3">Clicks</th>
+                  <th className="px-3 py-3">Add To Cart</th>
+                  <th className="px-3 py-3">Rate</th>
+                  <th className="px-3 py-3">Interested Visitors</th>
+                  <th className="px-3 py-3">Last Activity</th>
+                </tr>
+              </thead>
+              <tbody>
+                {analyticsProducts.slice(0, 10).map((product) => (
+                  <tr key={product.id} className="border-b border-slate-100">
+                    <td className="px-3 py-4">
+                      <p className="font-semibold text-ink">{product.title}</p>
+                      <p className="text-xs text-slate-500">{product.category}</p>
+                    </td>
+                    <td className="px-3 py-4 font-black text-ink">
+                      {Number(product.views || 0).toLocaleString('en-IN')}
+                      <p className="mt-1 text-xs font-medium text-slate-500">{Number(product.views7d || 0).toLocaleString('en-IN')} in last 7 days</p>
+                    </td>
+                    <td className="px-3 py-4 font-black text-ink">
+                      {Number(product.addToCart || 0).toLocaleString('en-IN')}
+                      <p className="mt-1 text-xs font-medium text-slate-500">{Number(product.addToCart7d || 0).toLocaleString('en-IN')} in last 7 days</p>
+                    </td>
+                    <td className="px-3 py-4">
+                      <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+                        {Number(product.addToCartRate || 0)}%
+                      </span>
+                    </td>
+                    <td className="px-3 py-4 text-slate-600">{Number(product.interestedVisitors || 0).toLocaleString('en-IN')}</td>
+                    <td className="px-3 py-4 text-slate-600">{formatAnalyticsDate(product.lastInteractionAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="mt-5 rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
+            No product analytics yet. Once visitors browse products on the live site, this table will fill automatically.
+          </div>
+        )}
       </section>
 
       <div className="grid gap-8 xl:grid-cols-2">
@@ -637,13 +799,24 @@ export function AdminDashboard() {
         <h2 className="text-xl font-black text-ink">Products</h2>
         <div className="mt-4 grid gap-3 lg:grid-cols-2">
           {dashboard.products.map((product) => (
-            <div key={product.id} className="rounded-2xl bg-slate-50 px-4 py-3">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="font-semibold text-ink">{product.title}</p>
-                  <p className="text-sm text-slate-500">Rs {product.price} - {product.stock} in stock</p>
-                </div>
-                <div className="flex gap-2">
+              <div key={product.id} className="rounded-2xl bg-slate-50 px-4 py-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="font-semibold text-ink">{product.title}</p>
+                    <p className="text-sm text-slate-500">Rs {product.price} - {product.stock} in stock</p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+                        {Number(analyticsByProductId.get(String(product.id))?.views || 0).toLocaleString('en-IN')} clicks
+                      </span>
+                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+                        {Number(analyticsByProductId.get(String(product.id))?.addToCart || 0).toLocaleString('en-IN')} add to cart
+                      </span>
+                      <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">
+                        {Number(analyticsByProductId.get(String(product.id))?.addToCartRate || 0)}% rate
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
                   <button type="button" onClick={() => editProduct(product)} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold">
                     Edit
                   </button>

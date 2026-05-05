@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { ShopProvider } from './context/ShopContext';
 import { useShop } from './hooks/useShop';
 import { AnnouncementBar } from './components/layout/AnnouncementBar';
@@ -6,6 +6,7 @@ import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { ScrollToTop } from './components/layout/ScrollToTop';
 import { CartFeedback } from './components/layout/CartFeedback';
+import { RouteAnalyticsTracker } from './components/layout/RouteAnalyticsTracker';
 import { Chatbot, PurchaseToast } from './components/layout/EngagementWidgets';
 import { HomePage } from './pages/HomePage';
 import { HotDealsPage } from './pages/HotDealsPage';
@@ -23,11 +24,14 @@ import { NotFoundPage } from './pages/NotFoundPage';
 
 function AppShell() {
   const { announcements } = useShop();
+  const location = useLocation();
+  const hideAnnouncementBar = ['/cart', '/checkout'].includes(location.pathname);
 
   return (
     <div className="min-h-screen bg-slate-50 text-ink">
       <ScrollToTop />
-      <AnnouncementBar items={announcements} />
+      <RouteAnalyticsTracker />
+      {!hideAnnouncementBar ? <AnnouncementBar items={announcements} /> : null}
       <Header />
       <main>
         <Routes>

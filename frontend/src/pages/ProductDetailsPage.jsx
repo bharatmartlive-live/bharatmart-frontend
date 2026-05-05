@@ -1,5 +1,5 @@
 ﻿import { Eye, MessageSquareQuote, PlayCircle, ShoppingCart, ShieldCheck, Star, Truck } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   getAverageRating,
@@ -11,6 +11,7 @@ import {
 import { useLiveViewers } from '../hooks/useLiveViewers';
 import { useShop } from '../hooks/useShop';
 import { getProductType, getRecentOrderCount } from '../lib/productTypes';
+import { trackAnalyticsEvent } from '../lib/analytics';
 
 function getYouTubeEmbedUrl(url = '') {
   const shortsMatch = url.match(/youtube\.com\/shorts\/([^?&/]+)/);
@@ -29,6 +30,17 @@ export function ProductDetailsPage() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeMedia, setActiveMedia] = useState('image');
   const viewers = useLiveViewers('product');
+
+  useEffect(() => {
+    if (!product?.id) return;
+
+    trackAnalyticsEvent({
+      eventType: 'product_view',
+      productId: product.id,
+      dedupeKey: `product:${product.id}`,
+      dedupeWindowMs: 1500
+    });
+  }, [product?.id]);
 
   if (!product) {
     return <div className="mx-auto max-w-7xl px-4 py-16 text-center text-slate-500">Product not found.</div>;
