@@ -27,47 +27,47 @@ const ratingsPool = [5, 5, 4, 5, 4, 5, 5, 4, 5, 4, 5, 4, 5, 5, 4, 5, 4, 5, 4, 5]
 const datesPool = [
   '2 din pehle',
   '4 din pehle',
-  '5 din pehle',
-  '1 week pehle',
+  '6 din pehle',
+  '1 hafte pehle',
   '8 din pehle',
   '10 din pehle',
-  '11 din pehle',
   '12 din pehle',
-  '13 din pehle',
-  '2 weeks pehle',
+  '2 hafte pehle',
+  '14 din pehle',
   '15 din pehle',
-  '17 din pehle',
-  '19 din pehle',
-  '21 din pehle',
+  '15 din pehle',
+  '18 din pehle',
+  '20 din pehle',
+  '3 hafte pehle',
   '23 din pehle',
   '25 din pehle',
   '26 din pehle',
-  '27 din pehle',
-  '28 din pehle',
-  '29 din pehle'
+  '4 hafte pehle',
+  '1 mahine ke andar',
+  'Recently verified'
 ];
 
 const faqByType = {
   'Physical Product': [
-    ['Delivery kitne din me hoti hai?', 'Usually physical product 3 se 7 din me deliver ho jata hai, location ke hisaab se thoda vary kar sakta hai.'],
-    ['COD available hai kya?', 'Haan, eligible pin codes par Cash on Delivery available hai aur product page par clearly shown hai.'],
-    ['Stock khatam ho gaya to?', 'Agar item sold out ho jaye, popular physical products ka restock around 14 days ke andar expected hota hai.'],
-    ['Return possible hai?', 'Eligible products 7 days ke andar return ho sakte hain if unused, proper condition me aur original packaging ke saath.'],
-    ['Tracking update milega?', 'Haan, dashboard me packed, shipped aur delivered status step by step show hota hai.']
+    ['Delivery kitne din me ho jati hai?', 'Normally physical product 3 se 7 din ke andar pahunch jata hai. Exact time aapki location aur courier route par depend karta hai.'],
+    ['COD available hai kya?', 'Haan, eligible pin code par Cash on Delivery available hai. Product page aur checkout par ye clearly show hota hai.'],
+    ['Agar stock khatam ho gaya to?', 'Agar item sold out ho jaye to popular physical products ka restock usually 14 din ke around expected hota hai.'],
+    ['Return ya replace ho sakta hai kya?', 'Haan, eligible item unused condition aur original packaging ke saath return/replacement review ke liye raise kiya ja sakta hai.'],
+    ['Tracking update kahaan dikhega?', 'Order place hone ke baad aapke dashboard me packed, shipped aur delivered status step by step dikhega.']
   ],
   'Plant Based': [
-    ['Microgreen kitna fresh aata hai?', 'Plant-based items carefully handled hote hain aur alag section me dikhaye jaate hain so freshness expectation clear rahe.'],
-    ['Delivery ke baad kaise store karein?', 'Refrigeration ya pack instructions follow karein to freshness aur texture better rahega.'],
-    ['COD available hai kya?', 'Haan, serviceable area me available ho sakta hai. Perishable item hone ki wajah se pin code par depend kar sakta hai.'],
-    ['Damage aaye to kya karein?', 'Order number aur photo ke saath support ko jaldi contact karein, team help karegi.'],
-    ['Ye alag section me kyun dikh raha hai?', 'Microgreen products ko alag dikhaya gaya hai so buyer ko clear rahe ki ye fresh plant-based category hai.']
+    ['Microgreen kitna fresh milta hai?', 'Plant-based item carefully handle kiya jata hai aur isi liye alag section me show hota hai, taki freshness expectation clear rahe.'],
+    ['Delivery ke baad store kaise karein?', 'Best result ke liye refrigeration ya pack par diya gaya storage instruction follow karein.'],
+    ['COD microgreen par bhi milega?', 'Haan, serviceable area me mil sakta hai. Perishable nature ki wajah se kuch pin codes par availability differ kar sakti hai.'],
+    ['Agar pack damage ho jaye to?', 'Order number aur photo ke saath support ko turant contact karein, team review karke help karegi.'],
+    ['Ye alag category me kyun dikh raha hai?', 'Microgreen ko normal gadget ya digital item se alag dikhaya gaya hai, taki buyer ko product nature instantly samajh aaye.']
   ],
   'Digital Product': [
-    ['Digital product kaise milega?', 'Digital product instant-access type section ke liye organized hai aur physical inventory se alag show hota hai.'],
-    ['Kya ye courier se aayega?', 'Nahi, digital products non-physical hote hain aur downloadable ya online-access use case ke liye hote hain.'],
-    ['Coupon apply kar sakte hain?', 'Haan, active coupon eligible item par apply ho sakta hai during checkout.'],
-    ['COD hai kya?', 'Store-wide COD messaging visible hai, lekin digital fulfillment rules aap baad me aur customize kar sakte hain.'],
-    ['Purchase history baad me dikhegi?', 'Haan, dashboard aur order records se support aur reference maintain karna easy rahega.']
+    ['Digital product ka access kaise milega?', 'Digital product ko physical inventory se alag organize kiya gaya hai, taki buyer ko instantly samajh aaye ki ye non-physical purchase hai.'],
+    ['Kya ye courier se ghar aayega?', 'Nahi, digital product non-physical hota hai aur normally downloadable ya online-access type use case ke liye hota hai.'],
+    ['Coupon apply ho sakta hai kya?', 'Haan, active coupon eligible digital item par bhi checkout ke time apply ho sakta hai.'],
+    ['COD yahan kaise kaam karega?', 'Store-wide COD visibility dikh rahi hai, lekin digital fulfillment rule aap future me aur clearly customize kar sakte hain.'],
+    ['Purchase record baad me milega?', 'Haan, dashboard aur order history future support aur reference ke liye useful rahegi.']
   ]
 };
 

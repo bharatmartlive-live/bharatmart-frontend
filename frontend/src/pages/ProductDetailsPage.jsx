@@ -216,7 +216,7 @@ export function ProductDetailsPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-600">Customer Reviews</p>
-            <h2 className="mt-2 text-2xl font-black text-ink sm:text-3xl">Real Indian buyer reviews</h2>
+            <h2 className="mt-2 text-2xl font-black text-ink sm:text-3xl">Real Indian buyer reviews / Asli customer feedback</h2>
             <p className="mt-2 text-sm text-slate-600">
               {visibleReviewCount} reviews shown below. {reviewVolume.toLocaleString('en-IN')}+ more customers reviewed this product in the last 1 month.
             </p>
@@ -269,14 +269,14 @@ export function ProductDetailsPage() {
         </div>
 
         <div className="mt-6 rounded-3xl border border-dashed border-orange-200 bg-orange-50 p-5 text-center">
-          <p className="text-lg font-black text-ink">{reviewVolume.toLocaleString('en-IN')}+ more customer reviews available</p>
-          <p className="mt-2 text-sm text-slate-600">Top reviews yahan show kiye gaye hain so buyers jaldi decision le sakein.</p>
+          <p className="text-lg font-black text-ink">{reviewVolume.toLocaleString('en-IN')}+ aur customer reviews available</p>
+          <p className="mt-2 text-sm text-slate-600">Top reviews yahan dikhaye gaye hain taki buyer jaldi aur confidently decision le sake.</p>
         </div>
       </div>
 
       <div className="mt-10 rounded-[34px] border border-slate-200 bg-white p-5 shadow-soft sm:p-7">
         <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-600">Product FAQ</p>
-        <h2 className="mt-2 text-2xl font-black text-ink sm:text-3xl">Questions customers ask before buying</h2>
+        <h2 className="mt-2 text-2xl font-black text-ink sm:text-3xl">Kharidne se pehle log kya poochte hain</h2>
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
           {faqs.map(([question, answer]) => (
             <article key={question} className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
