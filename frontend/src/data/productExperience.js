@@ -25,49 +25,49 @@ const reviewerPool = [
 
 const ratingsPool = [5, 5, 4, 5, 4, 5, 5, 4, 5, 4, 5, 4, 5, 5, 4, 5, 4, 5, 4, 5];
 const datesPool = [
-  '2 din pehle',
-  '4 din pehle',
-  '6 din pehle',
-  '1 hafte pehle',
-  '8 din pehle',
-  '10 din pehle',
-  '12 din pehle',
-  '2 hafte pehle',
-  '14 din pehle',
-  '15 din pehle',
-  '15 din pehle',
-  '18 din pehle',
-  '20 din pehle',
-  '3 hafte pehle',
-  '23 din pehle',
-  '25 din pehle',
-  '26 din pehle',
-  '4 hafte pehle',
-  '1 mahine ke andar',
+  '2 days ago',
+  '4 days ago',
+  '6 days ago',
+  '1 week ago',
+  '8 days ago',
+  '10 days ago',
+  '12 days ago',
+  '2 weeks ago',
+  '14 days ago',
+  '15 days ago',
+  '16 days ago',
+  '18 days ago',
+  '20 days ago',
+  '3 weeks ago',
+  '23 days ago',
+  '25 days ago',
+  '26 days ago',
+  '4 weeks ago',
+  'Within the last month',
   'Recently verified'
 ];
 
 const faqByType = {
   'Physical Product': [
-    ['Delivery kitne din me ho jati hai?', 'Normally physical product 3 se 7 din ke andar pahunch jata hai. Exact time aapki location aur courier route par depend karta hai.'],
-    ['COD available hai kya?', 'Haan, eligible pin code par Cash on Delivery available hai. Product page aur checkout par ye clearly show hota hai.'],
-    ['Agar stock khatam ho gaya to?', 'Agar item sold out ho jaye to popular physical products ka restock usually 14 din ke around expected hota hai.'],
-    ['Return ya replace ho sakta hai kya?', 'Haan, eligible item unused condition aur original packaging ke saath return/replacement review ke liye raise kiya ja sakta hai.'],
-    ['Tracking update kahaan dikhega?', 'Order place hone ke baad aapke dashboard me packed, shipped aur delivered status step by step dikhega.']
+    ['How long does delivery usually take?', 'Most physical products arrive within 3 to 7 days. The exact timeline depends on your location and courier route.'],
+    ['Is Cash on Delivery available?', 'Yes, Cash on Delivery is available for eligible pin codes and is clearly shown on the product page and at checkout.'],
+    ['What happens if the item goes out of stock?', 'If a popular item sells out, restocking is usually expected in around 14 days.'],
+    ['Can I request a return or replacement?', 'Yes, eligible items can be reviewed for return or replacement when they are unused and kept in the original packaging.'],
+    ['Where will I see tracking updates?', 'After the order is placed, your dashboard will show packed, shipped, and delivered updates step by step.']
   ],
   'Plant Based': [
-    ['Microgreen kitna fresh milta hai?', 'Plant-based item carefully handle kiya jata hai aur isi liye alag section me show hota hai, taki freshness expectation clear rahe.'],
-    ['Delivery ke baad store kaise karein?', 'Best result ke liye refrigeration ya pack par diya gaya storage instruction follow karein.'],
-    ['COD microgreen par bhi milega?', 'Haan, serviceable area me mil sakta hai. Perishable nature ki wajah se kuch pin codes par availability differ kar sakti hai.'],
-    ['Agar pack damage ho jaye to?', 'Order number aur photo ke saath support ko turant contact karein, team review karke help karegi.'],
-    ['Ye alag category me kyun dikh raha hai?', 'Microgreen ko normal gadget ya digital item se alag dikhaya gaya hai, taki buyer ko product nature instantly samajh aaye.']
+    ['How fresh are the microgreens?', 'Plant-based items are handled carefully and shown in a separate section so freshness expectations stay clear from the start.'],
+    ['How should I store the product after delivery?', 'For the best experience, follow refrigeration guidance or the storage instructions mentioned on the pack.'],
+    ['Is COD available for microgreens too?', 'Yes, it may be available in serviceable areas. Because these items are perishable, availability can vary by pin code.'],
+    ['What if the pack arrives damaged?', 'Contact support immediately with your order number and a photo, and the team will review the issue and help you quickly.'],
+    ['Why is this shown in a separate category?', 'Microgreens are shown separately from gadgets or digital items so the product type is instantly clear to the buyer.']
   ],
   'Digital Product': [
-    ['Digital product ka access kaise milega?', 'Digital product ko physical inventory se alag organize kiya gaya hai, taki buyer ko instantly samajh aaye ki ye non-physical purchase hai.'],
-    ['Kya ye courier se ghar aayega?', 'Nahi, digital product non-physical hota hai aur normally downloadable ya online-access type use case ke liye hota hai.'],
-    ['Coupon apply ho sakta hai kya?', 'Haan, active coupon eligible digital item par bhi checkout ke time apply ho sakta hai.'],
-    ['COD yahan kaise kaam karega?', 'Store-wide COD visibility dikh rahi hai, lekin digital fulfillment rule aap future me aur clearly customize kar sakte hain.'],
-    ['Purchase record baad me milega?', 'Haan, dashboard aur order history future support aur reference ke liye useful rahegi.']
+    ['How do I access a digital product?', 'Digital products are organized separately from physical inventory so buyers can immediately understand that the purchase is non-physical.'],
+    ['Will this be delivered by courier?', 'No, digital products are non-physical and are generally meant for download or online access.'],
+    ['Can I apply a coupon here too?', 'Yes, active coupons can also be applied to eligible digital products during checkout.'],
+    ['How does COD work for digital products?', 'Store-wide COD visibility may still appear, but digital fulfillment rules can be customized further depending on your future workflow.'],
+    ['Will I get a purchase record later?', 'Yes, your dashboard and order history will remain useful for future reference and support.']
   ]
 };
 
@@ -175,6 +175,60 @@ export function getVisibleReviewCount(product) {
 export function getReviewVolume(product) {
   const seed = makeSeed(product);
   return 1049 + ((seed * 7) % 1700);
+}
+
+function normalizePercentages(values) {
+  const total = values.reduce((sum, value) => sum + value, 0);
+  if (!total) return values.map(() => 0);
+
+  const rawPercentages = values.map((value) => (value / total) * 100);
+  const floored = rawPercentages.map((value) => Math.floor(value));
+  let remainder = 100 - floored.reduce((sum, value) => sum + value, 0);
+
+  const rankedIndexes = rawPercentages
+    .map((value, index) => ({ index, fraction: value - floored[index] }))
+    .sort((left, right) => right.fraction - left.fraction);
+
+  for (let index = 0; index < rankedIndexes.length && remainder > 0; index += 1) {
+    floored[rankedIndexes[index].index] += 1;
+    remainder -= 1;
+  }
+
+  return floored;
+}
+
+export function getGlobalRatingCount(product) {
+  const seed = makeSeed(product);
+  const reviewVolume = getReviewVolume(product);
+  const multiplier = 1.14 + ((seed % 5) * 0.03);
+  return Math.round(reviewVolume * multiplier);
+}
+
+export function getRatingBreakdown(product) {
+  const seed = makeSeed(product);
+  const type = getProductType(product).label;
+  const baselineByType = {
+    'Physical Product': [74, 16, 5, 2, 3],
+    'Plant Based': [71, 18, 6, 2, 3],
+    'Digital Product': [69, 20, 6, 2, 3]
+  };
+
+  const baseline = baselineByType[type] || baselineByType['Physical Product'];
+  const values = [...baseline];
+
+  values[0] += seed % 4;
+  values[1] += (seed % 3) - 1;
+  values[2] += seed % 2;
+  values[4] += (seed % 5) === 0 ? 1 : 0;
+
+  const percentages = normalizePercentages(values.map((value) => Math.max(1, value)));
+  const totalRatings = getGlobalRatingCount(product);
+
+  return [5, 4, 3, 2, 1].map((stars, index) => ({
+    stars,
+    percentage: percentages[index],
+    count: Math.round((totalRatings * percentages[index]) / 100)
+  }));
 }
 
 export function getProductFaqs(product) {

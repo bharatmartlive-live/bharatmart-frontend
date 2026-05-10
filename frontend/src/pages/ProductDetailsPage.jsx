@@ -1,10 +1,12 @@
-﻿import { Eye, MessageSquareQuote, PlayCircle, ShoppingCart, ShieldCheck, Star, Truck } from 'lucide-react';
+import { ChevronDown, Eye, MessageSquareQuote, PlayCircle, ShoppingCart, ShieldCheck, Star, Truck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   getAverageRating,
+  getGlobalRatingCount,
   getProductFaqs,
   getProductReviews,
+  getRatingBreakdown,
   getReviewVolume,
   getVisibleReviewCount
 } from '../data/productExperience';
@@ -29,6 +31,7 @@ export function ProductDetailsPage() {
   const product = products.find((item) => item.slug === slug || String(item.id) === slug);
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeMedia, setActiveMedia] = useState('image');
+  const [showRatingsInfo, setShowRatingsInfo] = useState(false);
   const viewers = useLiveViewers('product');
 
   useEffect(() => {
@@ -55,6 +58,8 @@ export function ProductDetailsPage() {
   const recentOrders = getRecentOrderCount(product);
   const reviews = getProductReviews(product);
   const averageRating = getAverageRating(product);
+  const globalRatingCount = getGlobalRatingCount(product);
+  const ratingBreakdown = getRatingBreakdown(product);
   const reviewVolume = getReviewVolume(product);
   const visibleReviewCount = getVisibleReviewCount(product);
   const faqs = getProductFaqs(product);
@@ -228,67 +233,115 @@ export function ProductDetailsPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-600">Customer Reviews</p>
-            <h2 className="mt-2 text-2xl font-black text-ink sm:text-3xl">Real Indian buyer reviews / Asli customer feedback</h2>
+            <h2 className="mt-2 text-2xl font-black text-ink sm:text-3xl">Real customer feedback from Indian buyers</h2>
             <p className="mt-2 text-sm text-slate-600">
               {visibleReviewCount} reviews shown below. {reviewVolume.toLocaleString('en-IN')}+ more customers reviewed this product in the last 1 month.
             </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl bg-slate-950 px-4 py-3 text-white">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-300">Average Rating</p>
-              <p className="mt-1 flex items-center gap-2 text-2xl font-black">
-                <Star className="h-5 w-5 fill-current text-yellow-400" /> {averageRating}
+        </div>
+
+        <div className="mt-6 grid gap-6 xl:grid-cols-[0.88fr,1.12fr]">
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+            <h3 className="text-3xl font-black text-ink">Customer reviews</h3>
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-orange-500">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <Star
+                  key={index}
+                  className={`h-6 w-6 ${index < Math.round(averageRating) ? 'fill-current' : ''}`}
+                />
+              ))}
+              <span className="ml-1 text-2xl font-black text-ink">{averageRating} out of 5</span>
+            </div>
+            <p className="mt-2 text-lg text-slate-600">{globalRatingCount.toLocaleString('en-IN')} global ratings</p>
+
+            <div className="mt-6 space-y-3">
+              {ratingBreakdown.map((item) => (
+                <div key={item.stars} className="grid grid-cols-[54px,1fr,48px] items-center gap-3 text-sm">
+                  <span className="font-medium text-slate-700">{item.stars} star</span>
+                  <div className="h-5 overflow-hidden rounded border border-slate-300 bg-white">
+                    <div
+                      className="h-full rounded-r bg-orange-500 transition-[width] duration-500"
+                      style={{ width: `${item.percentage}%` }}
+                    />
+                  </div>
+                  <span className="text-right font-semibold text-slate-700">{item.percentage}%</span>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowRatingsInfo((current) => !current)}
+              className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 transition hover:text-blue-800"
+            >
+              How are ratings calculated?
+              <ChevronDown className={`h-4 w-4 transition ${showRatingsInfo ? 'rotate-180' : ''}`} />
+            </button>
+            {showRatingsInfo ? (
+              <p className="mt-3 rounded-2xl bg-white px-4 py-3 text-sm leading-6 text-slate-600 shadow-sm">
+                Ratings combine verified purchases, review quality, recency, and broader customer feedback so buyers can quickly understand overall satisfaction.
               </p>
+            ) : null}
+          </div>
+
+          <div className="space-y-6">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl bg-slate-950 px-4 py-3 text-white">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-300">Average Rating</p>
+                <p className="mt-1 flex items-center gap-2 text-2xl font-black">
+                  <Star className="h-5 w-5 fill-current text-yellow-400" /> {averageRating}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-orange-50 px-4 py-3">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Visible Reviews</p>
+                <p className="mt-1 text-2xl font-black text-ink">{visibleReviewCount}</p>
+              </div>
+              <div className="rounded-2xl bg-emerald-50 px-4 py-3">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-600">Last 1 Month</p>
+                <p className="mt-1 text-2xl font-black text-ink">{reviewVolume.toLocaleString('en-IN')}+</p>
+              </div>
             </div>
-            <div className="rounded-2xl bg-orange-50 px-4 py-3">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Visible Reviews</p>
-              <p className="mt-1 text-2xl font-black text-ink">{visibleReviewCount}</p>
-            </div>
-            <div className="rounded-2xl bg-emerald-50 px-4 py-3">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-600">Last 1 Month</p>
-              <p className="mt-1 text-2xl font-black text-ink">{reviewVolume.toLocaleString('en-IN')}+</p>
+
+            <div className="grid gap-4 xl:grid-cols-2">
+              {reviews.map((review) => (
+                <article key={review.id} className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-orange-100 text-sm font-black text-orange-700">
+                      {review.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <p className="font-black text-ink">{review.name}</p>
+                          <p className="text-xs text-slate-500">{review.city} | {review.date}</p>
+                        </div>
+                        <div className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-black text-amber-600 shadow-sm">
+                          {Array.from({ length: review.rating }).map((_, index) => (
+                            <Star key={index} className="h-3.5 w-3.5 fill-current" />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="mt-3 text-sm leading-7 text-slate-700">{review.body}</p>
+                      <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
+                        <MessageSquareQuote className="h-3.5 w-3.5" /> Verified purchase
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
         </div>
 
-        <div className="mt-6 grid gap-4 xl:grid-cols-2">
-          {reviews.map((review) => (
-            <article key={review.id} className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
-              <div className="flex items-start gap-3">
-                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-orange-100 text-sm font-black text-orange-700">
-                  {review.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                      <p className="font-black text-ink">{review.name}</p>
-                      <p className="text-xs text-slate-500">{review.city} | {review.date}</p>
-                    </div>
-                    <div className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-black text-amber-600 shadow-sm">
-                      {Array.from({ length: review.rating }).map((_, index) => (
-                        <Star key={index} className="h-3.5 w-3.5 fill-current" />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="mt-3 text-sm leading-7 text-slate-700">{review.body}</p>
-                  <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
-                    <MessageSquareQuote className="h-3.5 w-3.5" /> Verified purchase
-                  </p>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-
         <div className="mt-6 rounded-3xl border border-dashed border-orange-200 bg-orange-50 p-5 text-center">
-          <p className="text-lg font-black text-ink">{reviewVolume.toLocaleString('en-IN')}+ aur customer reviews available</p>
-          <p className="mt-2 text-sm text-slate-600">Top reviews yahan dikhaye gaye hain taki buyer jaldi aur confidently decision le sake.</p>
+          <p className="text-lg font-black text-ink">{reviewVolume.toLocaleString('en-IN')}+ more customer reviews available</p>
+          <p className="mt-2 text-sm text-slate-600">Top reviews are shown here so buyers can make a faster and more confident decision.</p>
         </div>
       </div>
 
       <div className="mt-10 rounded-[34px] border border-slate-200 bg-white p-5 shadow-soft sm:p-7">
         <p className="text-xs font-black uppercase tracking-[0.24em] text-orange-600">Product FAQ</p>
-        <h2 className="mt-2 text-2xl font-black text-ink sm:text-3xl">Kharidne se pehle log kya poochte hain</h2>
+        <h2 className="mt-2 text-2xl font-black text-ink sm:text-3xl">Common questions before buying</h2>
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
           {faqs.map(([question, answer]) => (
             <article key={question} className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
