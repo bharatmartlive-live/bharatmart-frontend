@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react';
 
 const allowedHosts = [
   process.env.RENDER_EXTERNAL_HOSTNAME,
+  'bharatmart.live',
+  'www.bharatmart.live',
   ...(process.env.__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS || '')
     .split(',')
     .map((host) => host.trim())
