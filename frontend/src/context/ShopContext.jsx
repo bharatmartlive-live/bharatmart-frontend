@@ -39,6 +39,20 @@ const parseImages = (product) => ({
   video_url: withMediaUrl(product.video_url || '')
 });
 
+const mergeUniqueByKey = (items, key) =>
+  items.filter(
+    (item, index, list) =>
+      list.findIndex(
+        (entry) =>
+          String(entry?.[key] || '')
+            .trim()
+            .toLowerCase() ===
+          String(item?.[key] || '')
+            .trim()
+            .toLowerCase()
+      ) === index
+  );
+
 const wait = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
 async function requestWithRetry(request, retries = 4) {
@@ -101,12 +115,16 @@ export function ShopProvider({ children }) {
 
         if (!mounted) return;
 
+        const liveAnnouncements = contentRes.data.data.announcements?.map((item) => item.text) || [];
+        const liveCoupons = contentRes.data.data.coupons || [];
+
         setAnnouncements(
-          contentRes.data.data.announcements?.length
-            ? contentRes.data.data.announcements.map((item) => item.text)
-            : fallbackAnnouncements
+          mergeUniqueByKey(
+            [...liveAnnouncements.map((text) => ({ text })), ...fallbackAnnouncements.map((text) => ({ text }))],
+            'text'
+          ).map((item) => item.text)
         );
-        setCoupons(contentRes.data.data.coupons?.length ? contentRes.data.data.coupons : fallbackCoupons);
+        setCoupons(mergeUniqueByKey([...liveCoupons, ...fallbackCoupons], 'code'));
       } catch (error) {
         if (!mounted) return;
         setAnnouncements(fallbackAnnouncements);

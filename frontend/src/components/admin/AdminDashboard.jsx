@@ -55,6 +55,19 @@ const getOrderLine = (address = '', label) => {
   return line ? line.replace(new RegExp(`^${label}:\\s*`, 'i'), '') : '';
 };
 
+const getOrderBillingAddress = (order) => order.billing_address || getOrderLine(order.address, 'Billing') || order.address;
+const getOrderShippingAddress = (order) => order.shipping_address || getOrderLine(order.address, 'Shipping') || getOrderBillingAddress(order);
+const getOrderPaymentMethod = (order) => order.payment_method || getOrderLine(order.address, 'Payment') || 'COD';
+const getOrderPaymentStatus = (order) =>
+  order.payment_status || (getOrderPaymentMethod(order) === 'ONLINE' ? 'Paid' : 'Pending');
+const getOrderCouponLabel = (order) =>
+  order.coupon_code
+    ? `${order.coupon_code}${Number(order.coupon_discount || 0) > 0 ? ` (saved ${formatCurrency(order.coupon_discount)})` : ''}`
+    : getOrderLine(order.address, 'Coupon') || 'No coupon';
+const getOrderNote = (order) => order.note || getOrderLine(order.address, 'Note') || 'No note';
+const getPaymentMethodLabel = (order) =>
+  getOrderPaymentMethod(order) === 'ONLINE' ? 'Paid Online' : 'Cash on Delivery';
+
 const getOrderSupportUrl = (order) => {
   const orderNumber = getDisplayOrderNumber(order.id);
   const text = encodeURIComponent(`Hello BharatMart, I need help with ${orderNumber} for ${order.customer_name}.`);
@@ -188,6 +201,7 @@ export function AdminDashboard() {
   };
 
   const editProduct = (product) => {
+    const specifications = JSON.parse(product.specifications || '[]');
     setEditingProductId(product.id);
     setProductForm({
       title: product.title,
@@ -198,7 +212,9 @@ export function AdminDashboard() {
       category: product.category,
       featured: Boolean(product.featured),
       imageUrlsText: JSON.parse(product.image_urls || '[]').join(', '),
-      videoUrl: product.video_url || ''
+      videoUrl: product.video_url || '',
+      specificationsText: stringifySpecifications(specifications),
+      specifications: specifications.length ? specifications : [{ label: '', value: '' }]
     });
   };
 
@@ -371,7 +387,7 @@ export function AdminDashboard() {
         </div>
       </section>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <div className="rounded-[24px] bg-white p-5 shadow-soft">
           <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Total Orders</p>
           <p className="mt-2 text-3xl font-black text-ink">{dashboard.orders.length}</p>
@@ -387,6 +403,12 @@ export function AdminDashboard() {
         <div className="rounded-[24px] bg-white p-5 shadow-soft">
           <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Revenue</p>
           <p className="mt-2 text-2xl font-black text-ink">{formatCurrency(dashboard.orders.reduce((sum, order) => sum + Number(order.total_price || 0), 0))}</p>
+        </div>
+        <div className="rounded-[24px] bg-white p-5 shadow-soft">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Paid Online</p>
+          <p className="mt-2 text-3xl font-black text-emerald-600">
+            {dashboard.orders.filter((order) => getOrderPaymentMethod(order) === 'ONLINE').length}
+          </p>
         </div>
       </div>
 
@@ -431,11 +453,12 @@ export function AdminDashboard() {
         </div>
         <div className="mt-5 space-y-4">
           {filteredOrders.length ? filteredOrders.map((order) => {
-            const billing = getOrderLine(order.address, 'Billing');
-            const shipping = getOrderLine(order.address, 'Shipping');
-            const payment = getOrderLine(order.address, 'Payment') || 'COD';
-            const coupon = getOrderLine(order.address, 'Coupon') || 'No coupon';
-            const note = getOrderLine(order.address, 'Note') || 'No note';
+            const billing = getOrderBillingAddress(order);
+            const shipping = getOrderShippingAddress(order);
+            const payment = getOrderPaymentMethod(order);
+            const paymentStatus = getOrderPaymentStatus(order);
+            const coupon = getOrderCouponLabel(order);
+            const note = getOrderNote(order);
             return (
               <div key={order.id} className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
                 <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
@@ -448,8 +471,28 @@ export function AdminDashboard() {
                   <div className="rounded-2xl bg-white px-4 py-3 text-right shadow-sm">
                     <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Order Value</p>
                     <p className="text-2xl font-black text-emerald-600">{formatCurrency(order.total_price)}</p>
-                    <p className="mt-1 text-xs font-bold text-slate-500">{payment}</p>
+                    <p className="mt-1 text-xs font-bold text-slate-500">{getPaymentMethodLabel(order)}</p>
+                    <p className="mt-1 text-xs font-bold text-orange-600">{paymentStatus}</p>
                   </div>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2 text-xs font-black">
+                  <span className="rounded-full bg-white px-3 py-1 text-slate-600">
+                    Original {formatCurrency(order.original_total || order.total_price)}
+                  </span>
+                  <span className="rounded-full bg-white px-3 py-1 text-slate-600">
+                    Checkout {formatCurrency(order.subtotal_price || order.total_price)}
+                  </span>
+                  {Number(order.coupon_discount || 0) > 0 ? (
+                    <span className="rounded-full bg-orange-100 px-3 py-1 text-orange-700">
+                      Coupon saved {formatCurrency(order.coupon_discount)}
+                    </span>
+                  ) : null}
+                  {Number(order.online_discount || 0) > 0 ? (
+                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-700">
+                      Prepaid saved {formatCurrency(order.online_discount)}
+                    </span>
+                  ) : null}
                 </div>
 
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -468,6 +511,14 @@ export function AdminDashboard() {
                   <div className="rounded-2xl bg-white p-4 text-sm">
                     <p className="font-black text-ink">Customer Note</p>
                     <p className="mt-1 text-slate-600">{note}</p>
+                  </div>
+                  <div className="rounded-2xl bg-white p-4 text-sm">
+                    <p className="font-black text-ink">Payment Method</p>
+                    <p className="mt-1 text-slate-600">{getPaymentMethodLabel(order)}</p>
+                  </div>
+                  <div className="rounded-2xl bg-white p-4 text-sm">
+                    <p className="font-black text-ink">Payment Status</p>
+                    <p className="mt-1 text-slate-600">{paymentStatus}</p>
                   </div>
                 </div>
 

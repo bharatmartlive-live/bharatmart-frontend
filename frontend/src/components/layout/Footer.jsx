@@ -1,7 +1,8 @@
-﻿import { Facebook, Instagram, Mail, MapPin, Phone, ShieldCheck, Youtube } from 'lucide-react';
+import { Facebook, Instagram, Mail, MapPin, Phone, ShieldCheck, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/logo.svg';
 import { socialLinks } from '../../data/socialLinks';
+import { storeCampaign } from '../../data/storeCampaign';
 
 const icons = {
   Facebook,
@@ -15,7 +16,10 @@ export function Footer() {
     <footer className="mt-16">
       <div className="bg-gradient-to-r from-orange-600 via-orange-500 to-red-500 px-4 py-12 text-center text-white">
         <h2 className="text-3xl font-black tracking-wide md:text-4xl">Don't Miss Out!</h2>
-        <p className="mt-3 text-lg">15% OFF on everything - offer ends 15 July 2026</p>
+        <p className="mt-3 text-lg">
+          {storeCampaign.couponDiscount}% OFF on all products with {storeCampaign.couponCode} -
+          offer ends {storeCampaign.saleEndsLabel}
+        </p>
         <Link
           to="/"
           className="mt-6 inline-flex rounded-xl bg-white px-8 py-3 font-bold text-orange-600 shadow-soft transition hover:-translate-y-0.5 hover:bg-orange-50"
@@ -29,8 +33,8 @@ export function Footer() {
           <div>
             <img src={logo} alt="BharatMart logo" className="h-24 w-24 rounded-full object-cover shadow-lg" />
             <p className="mt-5 max-w-sm text-sm leading-6">
-              BharatMart.live is India's trusted online shopping destination. We bring high-quality summer products,
-              fast delivery, COD availability, and unbeatable prices across India.
+              BharatMart.live is India's trusted online shopping destination. We bring high-quality
+              summer products, fast delivery, COD availability, and unbeatable prices across India.
             </p>
             <p className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-emerald-400">
               <ShieldCheck className="h-4 w-4" /> Verified & Trusted Seller
@@ -61,29 +65,51 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-black text-white">Contact Us</h3>
             <div className="mt-5 space-y-4 text-sm">
-              <p className="flex items-center gap-3"><Phone className="h-4 w-4" /> +91 88262 19600</p>
-              <p className="flex items-center gap-3"><Mail className="h-4 w-4" /> support@bharatmart.live</p>
-              <p className="flex items-center gap-3"><MapPin className="h-4 w-4" /> Mumbai, India</p>
+              <p className="flex items-center gap-3">
+                <Phone className="h-4 w-4" /> +91 88262 19600
+              </p>
+              <p className="flex items-center gap-3">
+                <Mail className="h-4 w-4" /> support@bharatmart.live
+              </p>
+              <p className="flex items-center gap-3">
+                <MapPin className="h-4 w-4" /> Mumbai, India
+              </p>
             </div>
           </div>
 
           <div>
             <h3 className="text-lg font-black text-white">Quick Links</h3>
             <nav className="mt-5 grid gap-3 text-sm">
-              <Link to="/about" className="hover:text-brand">About Us</Link>
-              <Link to="/faq" className="hover:text-brand">FAQ</Link>
-              <Link to="/testimonials" className="hover:text-brand">Testimonials</Link>
-              <Link to="/checkout" className="hover:text-brand">Shipping Info</Link>
+              <Link to="/about" className="hover:text-brand">
+                About Us
+              </Link>
+              <Link to="/faq" className="hover:text-brand">
+                FAQ
+              </Link>
+              <Link to="/testimonials" className="hover:text-brand">
+                Testimonials
+              </Link>
+              <Link to="/checkout" className="hover:text-brand">
+                Shipping Info
+              </Link>
             </nav>
           </div>
 
           <div>
             <h3 className="text-lg font-black text-white">Policies</h3>
             <nav className="mt-5 grid gap-3 text-sm">
-              <Link to="/privacy-policy" className="hover:text-brand">Privacy Policy</Link>
-              <Link to="/terms-and-conditions" className="hover:text-brand">Terms & Conditions</Link>
-              <Link to="/return-policy" className="hover:text-brand">Return Policy</Link>
-              <Link to="/cart" className="hover:text-brand">Cart</Link>
+              <Link to="/privacy-policy" className="hover:text-brand">
+                Privacy Policy
+              </Link>
+              <Link to="/terms-and-conditions" className="hover:text-brand">
+                Terms & Conditions
+              </Link>
+              <Link to="/return-policy" className="hover:text-brand">
+                Return Policy
+              </Link>
+              <Link to="/cart" className="hover:text-brand">
+                Cart
+              </Link>
             </nav>
           </div>
         </div>
@@ -94,6 +120,3 @@ export function Footer() {
     </footer>
   );
 }
-
-
-

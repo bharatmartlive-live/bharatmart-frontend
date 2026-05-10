@@ -1,5 +1,6 @@
 import { HeroSection } from '../components/home/HeroSection';
 import { ProductSection } from '../components/home/ProductSection';
+import { storeCampaign } from '../data/storeCampaign';
 import { useShop } from '../hooks/useShop';
 
 export function HomePage() {
@@ -31,7 +32,14 @@ export function HomePage() {
             <div key={coupon.id ?? coupon.code} className="rounded-3xl bg-cream p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Coupon</p>
               <p className="mt-2 text-2xl font-black text-ink">{coupon.code}</p>
-              <p className="mt-1 text-sm text-slate-600">Save {coupon.discount}% on eligible items</p>
+              <p className="mt-1 text-sm text-slate-600">
+                Save {coupon.discount}% on eligible items
+              </p>
+              {String(coupon.code).toUpperCase() === storeCampaign.couponCode ? (
+                <p className="mt-2 text-xs font-bold text-emerald-700">
+                  Plus extra {storeCampaign.onlinePaymentExtraDiscount}% off on online payment
+                </p>
+              ) : null}
             </div>
           ))}
         </div>

@@ -1,12 +1,14 @@
+import { storeCampaign } from './storeCampaign';
+
 export const fallbackAnnouncements = [
-  'SUMMER FLASH: Up to 55% off cooling essentials',
-  'Use code HEATWAVE10 for extra savings',
+  storeCampaign.announcementText,
+  'Extra 5% off on all online payments powered by Razorpay',
   'Free shipping on orders above Rs 999'
 ];
 
 export const fallbackCoupons = [
-  { id: 1, code: 'HEATWAVE10', discount: 10, active: true },
-  { id: 2, code: 'SUMMER20', discount: 20, active: true }
+  { id: 1, code: storeCampaign.couponCode, discount: storeCampaign.couponDiscount, active: true },
+  { id: 2, code: 'HEATWAVE10', discount: 10, active: true }
 ];
 
 export const fallbackProducts = [

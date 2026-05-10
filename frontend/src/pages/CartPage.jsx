@@ -1,8 +1,14 @@
 import { Link } from 'react-router-dom';
+import { storeCampaign } from '../data/storeCampaign';
 import { useShop } from '../hooks/useShop';
+import { calculateCartPricing } from '../lib/pricing';
 
 export function CartPage() {
-  const { cartItems, cartSubtotal, updateQuantity } = useShop();
+  const { cartItems, updateQuantity } = useShop();
+  const pricing = calculateCartPricing(cartItems, {
+    code: storeCampaign.couponCode,
+    discount: storeCampaign.couponDiscount
+  });
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-10">
@@ -47,8 +53,18 @@ export function CartPage() {
           <h2 className="text-2xl font-black text-ink">Order Summary</h2>
           <div className="mt-4 space-y-3 text-sm text-slate-600">
             <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span>Rs {Math.round(cartSubtotal)}</span>
+              <span>Discounted Price</span>
+              <span>Rs {Math.round(pricing.subtotalPrice)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>{storeCampaign.couponCode} Coupon</span>
+              <span className="font-bold text-emerald-600">- Rs {Math.round(pricing.couponDiscount)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Online Payment Bonus</span>
+              <span className="font-bold text-emerald-600">
+                Up to Rs {Math.round((pricing.subtotalPrice - pricing.couponDiscount) * (storeCampaign.onlinePaymentExtraDiscount / 100))}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Shipping</span>
@@ -57,10 +73,14 @@ export function CartPage() {
           </div>
           <div className="mt-6 border-t border-slate-200 pt-4">
             <div className="flex justify-between text-lg font-bold text-ink">
-              <span>Total</span>
-              <span>Rs {Math.round(cartSubtotal)}</span>
+              <span>Total after {storeCampaign.couponCode}</span>
+              <span>Rs {Math.round(pricing.totalPrice)}</span>
             </div>
           </div>
+          <p className="mt-4 rounded-2xl bg-orange-50 px-4 py-3 text-xs font-bold text-orange-700">
+            Summer sale ends {storeCampaign.saleEndsLabel}. Choose secure online payment at checkout
+            for an additional {storeCampaign.onlinePaymentExtraDiscount}% off.
+          </p>
           <Link
             to="/checkout"
             className="mt-6 inline-flex w-full justify-center rounded-full bg-brand px-5 py-3 font-semibold text-navy"

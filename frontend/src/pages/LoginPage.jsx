@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { clearStoredCustomer, getDisplayOrderNumber, getStoredCustomer, getTrackingColor, getTrackingLabel, setStoredCustomer } from '../lib/customer';
 
+const getPaymentMethodLabel = (method) => (method === 'ONLINE' ? 'Paid Online' : 'Cash on Delivery');
+
 export function LoginPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [mode, setMode] = useState('login');
@@ -86,6 +88,24 @@ export function LoginPage() {
                           {getTrackingLabel(order.status)}
                         </span>
                       </div>
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold">
+                        <span className="rounded-full bg-white px-3 py-1 text-slate-600">
+                          {getPaymentMethodLabel(order.payment_method)}
+                        </span>
+                        <span className="rounded-full bg-white px-3 py-1 text-slate-600">
+                          Payment {order.payment_status || 'Pending'}
+                        </span>
+                        {Number(order.online_discount || 0) > 0 ? (
+                          <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-700">
+                            Saved Rs {Math.round(order.online_discount)} prepaid bonus
+                          </span>
+                        ) : null}
+                        {order.coupon_code ? (
+                          <span className="rounded-full bg-orange-100 px-3 py-1 text-orange-700">
+                            Coupon {order.coupon_code}
+                          </span>
+                        ) : null}
+                      </div>
                       <div className="mt-4 grid gap-2 sm:grid-cols-3">
                         {['Order packed', 'Shipped', 'Delivered'].map((step) => {
                           const active =
@@ -102,14 +122,16 @@ export function LoginPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="rounded-3xl bg-slate-50 p-5 text-slate-500">No orders yet. Your COD orders will show here after checkout.</p>
+                  <p className="rounded-3xl bg-slate-50 p-5 text-slate-500">
+                    No orders yet. Your COD and prepaid orders will show here after checkout.
+                  </p>
                 )}
               </div>
             </div>
             <div className="rounded-3xl bg-orange-50 p-5">
               <h2 className="text-2xl font-black text-ink">Account Benefits</h2>
               <div className="mt-5 space-y-3 text-sm font-semibold text-slate-700">
-                <p>COD order tracking</p>
+                <p>COD and prepaid order tracking</p>
                 <p>Saved customer details</p>
                 <p>Monthly offer alerts</p>
                 <p>Faster checkout next time</p>

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useShop } from '../../hooks/useShop';
 import { api } from '../../lib/api';
-import { clearStoredCustomer, getStoredCustomer, getTrackingColor, getTrackingLabel } from '../../lib/customer';
+import { clearStoredCustomer, getDisplayOrderNumber, getStoredCustomer, getTrackingColor, getTrackingLabel } from '../../lib/customer';
 import logo from '../../assets/logo.svg';
 
 const navLinks = [
@@ -21,6 +21,8 @@ export function Header() {
   const [customer, setCustomer] = useState(() => getStoredCustomer());
   const [orders, setOrders] = useState([]);
   const [profileOpen, setProfileOpen] = useState(false);
+
+  const getPaymentLabel = (order) => (order.payment_method === 'ONLINE' ? 'Paid Online' : 'Cash on Delivery');
 
   useEffect(() => {
     const syncCustomer = () => setCustomer(getStoredCustomer());
@@ -89,12 +91,15 @@ export function Header() {
                       orders.slice(0, 4).map((order) => (
                         <div key={order.id} className="rounded-2xl bg-slate-50 p-3">
                           <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-black text-ink">Order #{order.id}</p>
+                            <p className="text-sm font-black text-ink">{getDisplayOrderNumber(order.id)}</p>
                             <span className={`rounded-full px-2 py-1 text-xs font-bold ${getTrackingColor(order.status)}`}>
                               {getTrackingLabel(order.status)}
                             </span>
                           </div>
                           <p className="mt-2 text-xs text-slate-500">Total Rs {Math.round(order.total_price)}</p>
+                          <p className="mt-1 text-[11px] font-bold text-slate-500">
+                            {getPaymentLabel(order)}{Number(order.online_discount || 0) > 0 ? ` • Saved Rs ${Math.round(order.online_discount)}` : ''}
+                          </p>
                         </div>
                       ))
                     ) : (
