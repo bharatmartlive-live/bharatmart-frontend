@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: bharatmart-live-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://bharatmart-2.onrender.com/api
+      - key: VITE_MEDIA_URL
+        value: https://bharatmart-2.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
