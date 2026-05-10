@@ -92,7 +92,7 @@ export function ShopProvider({ children }) {
         setStoreError('');
       } catch (error) {
         if (!mounted) return;
-        setStoreError('Loading latest products, please wait...');
+        setStoreError('We could not load live products right now. Please wait a few seconds or refresh the page.');
         setProducts((current) => (current.length ? current : import.meta.env.PROD ? [] : fallbackProducts.map(parseImages)));
       }
 
